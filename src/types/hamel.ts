@@ -15,3 +15,6 @@ export interface RecommendationPush {
   urgency_level: UrgencyLevel;
   rationale?: string;
 }
+export interface AlertData extends RecommendationPush {
+  received_alert_time: string;
+}
