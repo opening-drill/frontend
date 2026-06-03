@@ -15,3 +15,11 @@ export type aircraftType = {
         velocityKmh: number,
     },
 };
+
+export type aircraftRowType = {
+        id: string,
+        name: string,
+        price: number,
+        payloadKg: number,
+        velocityKmh: number,
+}

@@ -9,7 +9,7 @@ import FlightIcon from "@mui/icons-material/Flight";
 import config from './AircraftTable.config';
 import { getAirCraftStatus } from "../../../../core/server/api/getAircraftStatus";
 import Loader from "../general/Loader";
-import type { aircraftType } from "./AircraftTable.type";
+import type { aircraftRowType, aircraftType } from "./AircraftTable.type";
 import type { AlertData } from "../../../../types/hamel";
 
 const rows = [
@@ -51,7 +51,7 @@ export const  AircraftTable = (props: { setIsAircraftTableOpen: React.Dispatch<R
   fetchAircraft();
 }, []);
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
-  const [selectedAircraft, setSelectedAircraft] = useState<aircraftType | null>(null);
+  const [selectedAircraft, setSelectedAircraft] = useState<aircraftRowType | null>(null);
 
   const handleLaunch = (alert: AlertData) => {
     props.setIsAircraftTableOpen(false);
@@ -130,7 +130,7 @@ export const  AircraftTable = (props: { setIsAircraftTableOpen: React.Dispatch<R
                 setSelectedAircraft(newSelection.row)
       }}
           />
-          <Button sx={{ width: 'fit-content', color: selectedAircraft !== null ? 'blue' : 'grey' }} onClick={() => handleLaunch({ ...props.alert!, aircraft_type: selectedAircraft!.type.name })} disabled={!selectedAircraft || !props.alert}>
+          <Button sx={{ width: 'fit-content', color: selectedAircraft !== null ? 'blue' : 'grey' }} onClick={() => handleLaunch({ ...props.alert!, aircraft_type: selectedAircraft!.name })} disabled={!selectedAircraft || !props.alert}>
           launch
         </Button>
         <Button sx={{ width: 'fit-content' }} onClick={() => props.setIsAircraftTableOpen(false)}>
