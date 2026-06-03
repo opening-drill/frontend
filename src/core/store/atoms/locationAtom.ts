@@ -3,8 +3,9 @@ import { useEffect, useCallback, useState } from 'react';
 
 // Define the type for our location state
 export type LocationState = {
-  latitude: number | null;
-  longitude: number | null;
+  latitude: number | null; // Decimal degrees (WGS 84)
+  longitude: number | null; // Decimal degrees (WGS 84)
+  heading: number | null; // Degrees clockwise from true north (0-360)
   error: string | null;
   loading: boolean;
 };
@@ -13,6 +14,7 @@ export type LocationState = {
 export const locationAtom = atom<LocationState>({
   latitude: null,
   longitude: null,
+  heading: null,
   error: null,
   loading: true,
 });
@@ -60,6 +62,7 @@ export function useDeviceLocation() {
         setLocation({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
+          heading: position.coords.heading,
           error: null,
           loading: false,
         });
