@@ -26,10 +26,7 @@ export async function loginRequest(credentials: LoginRequest): Promise<LoginResp
 
     // Basic input validation simulating server response rules
     const username = credentials.username.trim();
-    if (!username || !username.includes('@')) {
-      throw new Error('שם המשתמש חייב להיות אימייל צה"לי תקין (למשל, 1234567@idf.il)');
-    }
-
+    
     if (!credentials.password || credentials.password.length < 4) {
       throw new Error('הסיסמה חייבת להכיל לפחות 4 תווים');
     }
@@ -41,7 +38,7 @@ export async function loginRequest(credentials: LoginRequest): Promise<LoginResp
         id: username,
         first_name: 'דנה',
         last_name: 'כהן',
-        roles: ['cop_operator'],
+        role: '2',
         permissions: ['view', 'dispatch'],
       },
       expires_in: 28800,
