@@ -156,7 +156,7 @@ export const AlertsApp: React.FC = () => {
           paper: {
             sx: {
               width: '95vw',
-              height: '90vh',
+              height: '91vh',
               maxWidth: 'none',
               maxHeight: 'none',
             },

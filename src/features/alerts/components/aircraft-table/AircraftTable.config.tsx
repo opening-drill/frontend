@@ -35,11 +35,19 @@ const columns: GridColDef[] = [
     ),
   },
   {
-    field: "type",
-    headerName: "Type",
-    width: 190,
+    field: "amount",
+    headerName: "Amount",
+    width: 100,
     renderCell: (params: GridRenderCellParams) => (
-      <Typography sx={{ fontSize: "0.82rem", color: "#94a3b8", display: 'flex', alignItems: 'center', height: '100%' }}>{params.value}</Typography>
+      <Typography sx={{ fontSize: "0.82rem", color: "#cbd5e1", display: 'flex', alignItems: 'center', height: '100%' }}>{params.value}</Typography>
+    ),
+  },
+  {
+    field: "payload",
+    headerName: "Payload",
+    width: 100,
+    renderCell: (params: GridRenderCellParams) => (
+      <Typography sx={{ fontSize: "0.82rem", color: "#cbd5e1", display: 'flex', alignItems: 'center', height: '100%' }}>{params.value}</Typography>
     ),
   },
   {
@@ -63,29 +71,29 @@ const columns: GridColDef[] = [
       <Typography sx={{ fontSize: "0.82rem", color: "#cbd5e1", display: 'flex', alignItems: 'center', height: '100%' }}>{params.value}</Typography>
     ),
   },
-  {
-    field: "status",
-    headerName: "Status",
-    width: 140,
-    renderCell: (params: GridRenderCellParams) => {
-      // const cfg = statusConfig[params.value] || {};
-      return (
-        <Chip
-          label={params.value}
-          size="small"
-          variant="outlined"
-          sx={{
-            // ...cfg.style,
-            fontFamily: "'DM Mono', monospace",
-            fontSize: "0.7rem",
-            letterSpacing: "0.04em",
-            height: 24,
-            borderRadius: "6px",
-          }}
-        />
-      );
-    },
-  },
+  // {
+  //   field: "status",
+  //   headerName: "Status",
+  //   width: 140,
+  //   renderCell: (params: GridRenderCellParams) => {
+  //     // const cfg = statusConfig[params.value] || {};
+  //     return (
+  //       <Chip
+  //         label={params.value}
+  //         size="small"
+  //         variant="outlined"
+  //         sx={{
+  //           // ...cfg.style,
+  //           fontFamily: "'DM Mono', monospace",
+  //           fontSize: "0.7rem",
+  //           letterSpacing: "0.04em",
+  //           height: 24,
+  //           borderRadius: "6px",
+  //         }}
+  //       />
+  //     );
+  //   },
+  // },
 ];
 
 export default { columns }
