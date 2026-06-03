@@ -6,7 +6,7 @@ export type aircraftStatus = "Available" | "In Service" | "Maintenance" | "Retir
 
 export type statusCellParam = { value: aircraftStatus }
 
-export type aircraft = {
+export type aircraftType = {
     id: string,
     type: {
         name: string,

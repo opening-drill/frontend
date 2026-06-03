@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import {
   Box,
@@ -7,6 +7,8 @@ import {
 import FlightIcon from "@mui/icons-material/Flight";
 import config from './AircraftTable.config';
 import { getAirCraftStatus } from "../../../../core/server/api/getAircraftStatus";
+import Loader from "../general/Loader";
+import type { aircraftType } from "./AircraftTable.type";
 
 const rows = [
   { id: "AC-001", name: "Boeing 737 MAX", type: "Commercial Airliner", price: 121_900_000, location: "Chicago O'Hare", status: "Available" },
@@ -26,8 +28,25 @@ const rows = [
   { id: "AC-015", name: "Boeing 787-9", type: "Wide-body Airliner", price: 292_500_000, location: "Tokyo Haneda", status: "Reserved" },
 ];
 
-export const  AircraftTable: React.FC = async () => {
-  const aircraft = getAirCraftStatus().data;
+export const  AircraftTable: React.FC = () => {
+  const [aircraft, setAircraft] = useState<aircraftType[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+  const fetchAircraft = async () => {
+    try {
+      setLoading(true);
+      const response = await getAirCraftStatus();
+      setAircraft(response.data);
+    } catch (err) {
+      console.error("Failed to load aircraft:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchAircraft();
+}, []);
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
   const [selectedAircraft, setSelectedAircraft] = useState(null);
 
@@ -65,8 +84,9 @@ export const  AircraftTable: React.FC = async () => {
 
         {/* Grid */}
         <Box sx={{ height: 620, width: "100%" }}>
+          <Loader isLoading={loading} timeOut={30}>
           <DataGrid
-            rows={rows}
+            rows={config.formatAircraftData(aircraft)}
             columns={config.columns}
             getRowId={(row) => row.id}
             paginationModel={paginationModel}
@@ -111,6 +131,7 @@ export const  AircraftTable: React.FC = async () => {
         // setSelectedAircraft(aircraft);
       }}
           />
+          </Loader>
         </Box>
       </Box>
   );
