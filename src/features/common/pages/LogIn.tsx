@@ -45,6 +45,28 @@ const useStyles = makeStyles()((theme) => ({
   }
 }));
 
+const extractErrorMessage = (err: unknown): string => {
+  if (
+    typeof err === 'object' &&
+    err !== null &&
+    'response' in err &&
+    typeof (err as { response?: { data?: { message?: string } } }).response?.data?.message === 'string'
+  ) {
+    return (err as { response?: { data?: { message?: string } } }).response?.data?.message as string;
+  }
+
+  if (
+    typeof err === 'object' &&
+    err !== null &&
+    'message' in err &&
+    typeof (err as { message?: string }).message === 'string'
+  ) {
+    return (err as { message?: string }).message as string;
+  }
+
+  return 'Error logging in. Please try again.';
+};
+
 export const LogIn: React.FC = () => {
   const { classes } = useStyles();
   const navigate = useNavigate();
@@ -73,19 +95,7 @@ export const LogIn: React.FC = () => {
       navigate('/');
     } catch (err: unknown) {
       console.error('Login error:', err);
-      const errMsg =
-        (typeof err === 'object' &&
-        err !== null &&
-        'response' in err &&
-        typeof (err as { response?: { data?: { message?: string } } }).response?.data?.message === 'string'
-          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
-          : typeof err === 'object' &&
-            err !== null &&
-            'message' in err &&
-            typeof (err as { message?: string }).message === 'string'
-          ? (err as { message?: string }).message
-          : null) || 'Error logging in. Please try again.';
-      setError(errMsg);
+      setError(extractErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -107,10 +117,10 @@ export const LogIn: React.FC = () => {
         )}
 
         <form className={classes.form} onSubmit={handleSubmit} noValidate>
-                <TextField
-                  variant="outlined"
-                  margin="normal"
-                  required
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
             fullWidth
             id="username"
             label="שם משתמש"
@@ -148,7 +158,7 @@ export const LogIn: React.FC = () => {
             {loading ? (
               <CircularProgress size={24} sx={{ color: 'inherit' }} />
             ) : (
-              'Sign In'
+              'התחבר'
             )}
           </Button>
         </form>
