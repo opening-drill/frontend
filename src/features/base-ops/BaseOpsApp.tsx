@@ -55,44 +55,49 @@ export const BaseOpsApp: React.FC = () => {
     <Box className={classes.root}>
       <AppBar position="static" className={classes.appBar} elevation={0}>
         <Toolbar>
-          <Typography
-            variant="h6"
-            noWrap
-            component="div"
-            sx={{ fontWeight: "bold" }}
-          >
-            AIRcraft
-          </Typography>
-          <Button
-            onClick={() => {
-              goToLocation(LOCATIONS.telAviv.coords, 19.5);
-            }}
-          >
-            go-to
-          </Button>
-          <HubIcon sx={{ mr: 2, color: "secondary.main" }} />
-          <Typography
-            variant="h6"
-            noWrap
-            component="div"
-            sx={{ fontWeight: "bold", flexGrow: 1 }}
-          >
-            Base of Operations
-          </Typography>
-          <Button
-            color="inherit"
-            startIcon={<LogoutIcon />}
-            onClick={() => logout()}
+          <Box
             sx={{
-              textTransform: "none",
-              borderRadius: 2,
-              "&:hover": {
-                backgroundColor: "rgba(255, 255, 255, 0.08)",
-              },
+              width: "100%",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
-            Logout
-          </Button>
+            <Box sx={{ display: "flex" }}>
+              <HubIcon sx={{ mr: 2, color: "secondary.main" }} />
+
+              <Typography
+                variant="h6"
+                noWrap
+                component="div"
+                sx={{ fontWeight: "bold" }}
+              >
+                AIRcraft
+              </Typography>
+              <Button
+                onClick={() => {
+                  goToLocation(LOCATIONS.telAviv.coords, 19.5);
+                }}
+              >
+                go-to
+              </Button>
+            </Box>
+
+            <Button
+              color="inherit"
+              startIcon={<LogoutIcon />}
+              onClick={() => logout()}
+              sx={{
+                textTransform: "none",
+                borderRadius: 2,
+                "&:hover": {
+                  backgroundColor: "rgba(255, 255, 255, 0.08)",
+                },
+              }}
+            >
+              Logout
+            </Button>
+          </Box>
         </Toolbar>
       </AppBar>
       <Box
