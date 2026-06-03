@@ -20,6 +20,8 @@ import React from "react";
 import { makeStyles } from "tss-react/mui";
 import { logoutAtom } from "../../core/store/authAtom";
 import GenericMap from "../map/components/GenericMap";
+import { useHamelSocket } from "../../hooks/useHamelSocket";
+import { useAircraftSocket } from "../../hooks/useAircraftSocket";
 
 const drawerWidth = 240;
 
@@ -59,6 +61,10 @@ const useStyles = makeStyles()((theme) => ({
 export const CommanderApp: React.FC = () => {
   const { classes } = useStyles();
   const logout = useSetAtom(logoutAtom);
+
+  // Initialize socket listeners
+  useHamelSocket();
+  useAircraftSocket();
 
   return (
     <Box className={classes.root}>
