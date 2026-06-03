@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import {Box, Button, Typography, Paper, TextField,} from '@mui/material';
+import { Box, Button, Typography, Paper, TextField } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
+import { useNavigate } from 'react-router-dom';
+import { useSetAtom } from 'jotai';
+import { tokenAtom, userAtom } from '../../../core/store/authAtom';
 
 const NUMBER_OF_TARGETS = 15;
 const RADAR_SCAN_INTERVAL_MS = 4000;
@@ -12,14 +15,12 @@ const useStyles = makeStyles()((theme) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-
     background: 'linear-gradient(180deg, #030712 0%, #0B1329 100%)',
     position: 'fixed',
     top: 0,
     left: 0,
     overflow: 'hidden',
     zIndex: 0,
-
     '&::before': {
       content: '""',
       position: 'absolute',
@@ -32,7 +33,6 @@ const useStyles = makeStyles()((theme) => ({
       opacity: 1,
       zIndex: 0,
     },
-
     '&::after': {
       content: '""',
       position: 'absolute',
@@ -41,19 +41,18 @@ const useStyles = makeStyles()((theme) => ({
       width: '200vmax',
       height: '200vmax',
       transform: 'translate(-50%, -50%) rotate(0deg)',
-      background: 'linear-gradient(90deg, transparent 50%, rgba(56, 189, 248, 0.15) 50%, rgba(56, 189, 248, 0.25) 60%, transparent 80%)',
+      background:
+        'linear-gradient(90deg, transparent 50%, rgba(56, 189, 248, 0.15) 50%, rgba(56, 189, 248, 0.25) 60%, transparent 80%)',
       animation: 'big-radar-sweep 12s linear infinite',
       pointerEvents: 'none',
       opacity: 0.8,
       zIndex: 0,
     },
-
     '@keyframes big-radar-sweep': {
       '0%': { transform: 'translate(-50%, -50%) rotate(0deg)' },
       '100%': { transform: 'translate(-50%, -50%) rotate(360deg)' },
     },
   },
-
   redTarget: {
     position: 'absolute',
     width: 6,
@@ -65,7 +64,6 @@ const useStyles = makeStyles()((theme) => ({
     zIndex: 1,
     pointerEvents: 'none',
   },
-
   '@keyframes blinkRed': {
     '0%, 100%': {
       opacity: 0.2,
@@ -77,7 +75,6 @@ const useStyles = makeStyles()((theme) => ({
       boxShadow: '0 0 15px 3px rgba(239, 68, 68, 0.8)',
     },
   },
-
   paper: {
     width: '100%',
     maxWidth: 420,
@@ -93,7 +90,6 @@ const useStyles = makeStyles()((theme) => ({
     position: 'relative',
     pointerEvents: 'auto',
   },
-
   telemetryText: {
     position: 'absolute',
     color: 'rgba(56, 189, 248, 0.5)',
@@ -115,7 +111,6 @@ const useStyles = makeStyles()((theme) => ({
     bottom: '40px',
     alignItems: 'flex-end',
   },
-
   hudCorner: {
     position: 'absolute',
     width: 14,
@@ -128,7 +123,6 @@ const useStyles = makeStyles()((theme) => ({
   topRight: { top: 12, right: 12, borderWidth: '2px 2px 0 0' },
   bottomLeft: { bottom: 12, left: 12, borderWidth: '0 0 2px 2px' },
   bottomRight: { bottom: 12, right: 12, borderWidth: '0 2px 2px 0' },
-
   title: {
     color: '#FFFFFF',
     fontWeight: 900,
@@ -139,7 +133,6 @@ const useStyles = makeStyles()((theme) => ({
     fontSize: 'clamp(1.75rem, 4vw, 2.3rem)',
     textShadow: '0 0 15px rgba(56, 189, 248, 0.6)',
   },
-
   subtitle: {
     color: '#94A3B8',
     textAlign: 'center',
@@ -148,11 +141,9 @@ const useStyles = makeStyles()((theme) => ({
     fontWeight: 500,
     letterSpacing: '0.5px',
   },
-
   form: {
     width: '100%',
   },
-
   input: {
     marginBottom: theme.spacing(1),
     '& .MuiOutlinedInput-root': {
@@ -160,30 +151,24 @@ const useStyles = makeStyles()((theme) => ({
       borderRadius: 4,
       color: '#FFFFFF',
       transition: 'all 0.2s ease',
-
       '& fieldset': {
         borderColor: 'rgba(56, 189, 248, 0.2)',
       },
-
       '&:hover fieldset': {
         borderColor: 'rgba(56, 189, 248, 0.6)',
       },
-
       '&.Mui-focused fieldset': {
         borderColor: '#38bdf8',
         boxShadow: '0 0 12px rgba(56, 189, 248, 0.3)',
       },
     },
-
     '& .MuiInputLabel-root': {
       color: '#64748B',
     },
-
     '& .MuiInputLabel-root.Mui-focused': {
       color: '#38bdf8',
     },
   },
-
   submit: {
     marginTop: theme.spacing(3),
     height: 48,
@@ -195,18 +180,15 @@ const useStyles = makeStyles()((theme) => ({
     border: '1px solid rgba(56, 189, 248, 0.4)',
     boxShadow: '0 4px 20px rgba(2, 132, 199, 0.4)',
     transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-
     '&:hover': {
       background: 'linear-gradient(90deg, #2563eb 0%, #0ea5e9 100%)',
       transform: 'translateY(-1px)',
       boxShadow: '0 6px 25px rgba(2, 132, 199, 0.6)',
     },
-
     '&:active': {
       transform: 'translateY(1px)',
-    }
+    },
   },
-
   footer: {
     marginTop: theme.spacing(4),
     display: 'flex',
@@ -219,7 +201,6 @@ const useStyles = makeStyles()((theme) => ({
     borderTop: '1px solid rgba(148, 163, 184, 0.1)',
     paddingTop: theme.spacing(2.5),
   },
-
   statusDot: {
     width: 8,
     height: 8,
@@ -227,7 +208,6 @@ const useStyles = makeStyles()((theme) => ({
     background: '#10b981',
     boxShadow: '0 0 10px #10b981',
     animation: 'pulseStatus 2s infinite',
-
     '@keyframes pulseStatus': {
       '0%': {
         transform: 'scale(0.95)',
@@ -254,10 +234,12 @@ interface BackgroundTarget {
 
 export const LogIn: React.FC = () => {
   const { classes } = useStyles();
+  const navigate = useNavigate();
+  const setToken = useSetAtom(tokenAtom);
+  const setUser = useSetAtom(userAtom);
 
-  const [username, setUsername] = React.useState('');
-  const [password, setPassword] = React.useState('');
-
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [backgroundTargets, setBackgroundTargets] = useState<BackgroundTarget[]>([]);
 
   const generateFreshTargets = useCallback(() => {
@@ -267,7 +249,7 @@ export const LogIn: React.FC = () => {
         id: Date.now() + i,
         top: `${Math.random() * 100}%`,
         left: `${Math.random() * 100}%`,
-        delay: `${Math.random() * (RADAR_SCAN_INTERVAL_MS / 1000)}s`
+        delay: `${Math.random() * (RADAR_SCAN_INTERVAL_MS / 1000)}s`,
       });
     }
     setBackgroundTargets(targets);
@@ -275,43 +257,37 @@ export const LogIn: React.FC = () => {
 
   useEffect(() => {
     generateFreshTargets();
-
-    const scanInterval = setInterval(() => {
-      generateFreshTargets();
-    }, RADAR_SCAN_INTERVAL_MS);
-
+    const scanInterval = setInterval(generateFreshTargets, RADAR_SCAN_INTERVAL_MS);
     return () => clearInterval(scanInterval);
   }, [generateFreshTargets]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-
-    console.log('Dummy Auth Success:', {
-      username,
-      password,
-    });
-
-    alert(
-      `נשלח לפונקציית התחברות:
-משתמש: ${username}
-סיסמה: ${password}`
-    );
-
+    console.log('Dummy Auth Success:', { username, password });
+    setToken('dummy-token');
+    alert(`נשלח לפונקציית התחברות:\nמשתמש: ${username}\nסיסמה: ${password}`);
     window.location.href = '/';
+    setUser({
+      id: '1',
+      first_name: username,
+      last_name: '',
+      role: '1',
+      permissions: [],
+    });
+    navigate('/', { replace: true });
   };
 
   return (
     <Box className={classes.container} dir="rtl">
-
       {/* מטרות אדומות רנדומליות המשתנות בכל סריקה */}
-      {backgroundTargets.map(target => (
+      {backgroundTargets.map((target) => (
         <Box
           key={target.id}
           className={classes.redTarget}
           style={{
             top: target.top,
             left: target.left,
-            animationDelay: target.delay
+            animationDelay: target.delay,
           }}
         />
       ))}
@@ -323,25 +299,14 @@ export const LogIn: React.FC = () => {
         <Box className={`${classes.hudCorner} ${classes.bottomLeft}`} />
         <Box className={`${classes.hudCorner} ${classes.bottomRight}`} />
 
-        <Typography
-          variant="h5"
-          className={classes.title}
-        >
+        <Typography variant="h5" className={classes.title}>
           AIRCRAFT
         </Typography>
-
-        <Typography
-          variant="body2"
-          className={classes.subtitle}
-        >
+        <Typography variant="body2" className={classes.subtitle}>
           מתמונה בשטח להחלטה מבצעית בשניות
         </Typography>
 
-        <form
-          className={classes.form}
-          onSubmit={handleLogin}
-          noValidate
-        >
+        <form className={classes.form} onSubmit={handleLogin} noValidate>
           <TextField
             fullWidth
             required
@@ -349,11 +314,8 @@ export const LogIn: React.FC = () => {
             label="שם משתמש"
             value={username}
             className={classes.input}
-            onChange={(e) =>
-              setUsername(e.target.value)
-            }
+            onChange={(e) => setUsername(e.target.value)}
           />
-
           <TextField
             fullWidth
             required
@@ -362,17 +324,9 @@ export const LogIn: React.FC = () => {
             label="סיסמא"
             value={password}
             className={classes.input}
-            onChange={(e) =>
-              setPassword(e.target.value)
-            }
+            onChange={(e) => setPassword(e.target.value)}
           />
-
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            className={classes.submit}
-          >
+          <Button type="submit" fullWidth variant="contained" className={classes.submit}>
             התחברות
           </Button>
         </form>
