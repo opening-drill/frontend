@@ -26,12 +26,13 @@ const rows = [
 ];
 
 export default function AircraftTable() {
-  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
+  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
   const [selectedAircraft, setSelectedAircraft] = useState(null);
 
   return (
       <Box
         sx={{
+          height: "100vh",
           backgroundColor: "#0a0f1e",
           backgroundImage: "radial-gradient(ellipse at 20% 10%, rgba(56,189,248,0.05) 0%, transparent 60%), radial-gradient(ellipse at 80% 80%, rgba(99,102,241,0.04) 0%, transparent 60%)",
           p: { xs: 2, md: 4 },
@@ -62,7 +63,7 @@ export default function AircraftTable() {
         </Box>
 
         {/* Grid */}
-        <Box sx={{ height: 620, width: "100%" }}>
+        <Box sx={{ height: 380, width: "100%" }}>
           <DataGrid
             rows={rows}
             columns={config.columns}
@@ -77,25 +78,8 @@ export default function AircraftTable() {
                 quickFilterProps: { debounceMs: 300 },
               },
             }}
-            autoHeight
-            sx={{
-    border: "none",
-
-    "& .MuiDataGrid-row.Mui-selected": {
-      backgroundColor: "rgba(56,189,248,0.18)",
-    },
-
-    "& .MuiDataGrid-row.Mui-selected:hover": {
-      backgroundColor: "rgba(56,189,248,0.25)",
-    },
-
-    "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
-      outline: "none !important",
-    },
-
-    "& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within": {
-      outline: "none !important",
-    }}}
+            disableRowSelectionOnClick
+            sx={{ border: "none" }}
              onRowClick={(newSelection) => {
                 console.log('aa')
                 console.log(newSelection.row)
