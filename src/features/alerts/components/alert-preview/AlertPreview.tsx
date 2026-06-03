@@ -7,6 +7,7 @@ interface AttackCardProps {
   onAccept: (alert: AlertData) => void;
   onDecline: (alert: AlertData) => void;
   onChooseAnother: (alert: AlertData) => void;
+  setAlert: (alert: AlertData) => void;
 }
 
 export default function AttackCard({
@@ -15,6 +16,7 @@ export default function AttackCard({
   onAccept,
   onDecline,
   onChooseAnother,
+  setAlert,
 }: AttackCardProps) {
   if (!open) {
     return (
@@ -95,7 +97,7 @@ export default function AttackCard({
 
         <button
           className={styles.changeBtn}
-          onClick={() => onChooseAnother(alert)}
+          onClick={() => {setAlert(alert); onChooseAnother(alert)}}
         >
           Change Aircraft
         </button>

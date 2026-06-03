@@ -120,6 +120,7 @@ export const AlertsApp: React.FC = () => {
   };
 
   const [isAircraftTableOpen, setIsAircraftTableOpen] = useState(false)
+  const [selectedAlert, setSelectedAlert] = useState<AlertData | null>(null);
   
   return (
     <Box className={classes.root}>
@@ -141,6 +142,7 @@ export const AlertsApp: React.FC = () => {
                 onAccept={handleAccept}
                 onDecline={handleDecline}
                 onChooseAnother={handleChooseAnother}
+                setAlert={setSelectedAlert}
               />
             </Paper>
           </Grid>
@@ -163,7 +165,7 @@ export const AlertsApp: React.FC = () => {
           },
         }}
         open={isAircraftTableOpen} onClose={() => setIsAircraftTableOpen(false)}>
-        <AircraftTable setIsAircraftTableOpen={setIsAircraftTableOpen}/>
+        <AircraftTable setIsAircraftTableOpen={setIsAircraftTableOpen} handleAccept={handleAccept} alert={selectedAlert}/>
       </Dialog>
     </Box>
   );

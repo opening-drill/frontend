@@ -36,14 +36,6 @@ const columns: GridColDef[] = [
     ),
   },
   {
-    field: "type",
-    headerName: "Type",
-    width: 190,
-    renderCell: (params: GridRenderCellParams) => (
-      <Typography sx={{ fontSize: "0.82rem", color: "#94a3b8" }}>{params.value}</Typography>
-    ),
-  },
-  {
     field: "price",
     headerName: "Price (USD)",
     width: 160,

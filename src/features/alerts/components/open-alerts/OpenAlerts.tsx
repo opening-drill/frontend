@@ -8,6 +8,7 @@ interface Props {
   onAccept: (alert: AlertData) => void;
   onDecline: (alert: AlertData) => void;
   onChooseAnother: (alert: AlertData) => void;
+  setAlert: (alert: AlertData) => void;
 }
 
 export default function AttackCardList({
@@ -15,6 +16,7 @@ export default function AttackCardList({
   onAccept,
   onDecline,
   onChooseAnother,
+  setAlert,
 }: Props) {
   const [openId, setOpenId] = useState<string | null>(null);
 
@@ -34,6 +36,7 @@ export default function AttackCardList({
               onAccept={onAccept}
               onDecline={onDecline}
               onChooseAnother={onChooseAnother}
+              setAlert={setAlert}
             />
           </div>
         ))}
