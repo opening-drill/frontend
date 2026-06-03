@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Box, Typography, AppBar, Toolbar, Grid, Paper, Dialog, DialogTitle, Button, DialogActions } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
-import { GenericMap } from '../map/components/GenericMap';
 import HubIcon from '@mui/icons-material/Hub';
 
 import AttackCardList from './components/open-alerts/OpenAlerts';
 import type { AlertData } from '../../types/hamel';
 import { approveAttackRequest } from '../../core/server/api/approveAttackRequest';
 import AircraftTable from './components/aircraft-table/AircraftTable';
+import GenericMap from '../map/components/GenericMap';
 
 
 const useStyles = makeStyles()((theme) => ({

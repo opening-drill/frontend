@@ -5,8 +5,8 @@ import { LogIn } from '../features/common/pages/LogIn';
 import { Onboarding } from '../features/common/pages/Onboarding';
 import { CommanderApp } from '../features/commander/CommanderApp';
 
-import { BaseOpsApp } from '../features/base-ops/BaseOpsApp';
 import { isAuthenticatedAtom, userAtom } from './store/authAtom';
+import { AlertsApp } from '../features/alerts/AlertsApp';
 
 // Guard for authenticated-only routes
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -50,7 +50,7 @@ const RootRouter: React.FC = () => {
         path="/"
         element={
           <ProtectedRoute>
-            {role === '1' ? <CommanderApp /> : <BaseOpsApp />}
+            {role === '1' ? <CommanderApp /> : <AlertsApp />}
           </ProtectedRoute>
         }
       />
