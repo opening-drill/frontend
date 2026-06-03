@@ -36,10 +36,11 @@ export const  AircraftTable: React.FC = () => {
   const fetchAircraft = async () => {
     try {
       setLoading(true);
-      const response = await getAirCraftStatus();
-      setAircraft(response.data);
+      const aircraftData = await getAirCraftStatus();
+      setAircraft(aircraftData.data);
     } catch (err) {
       console.error("Failed to load aircraft:", err);
+      setAircraft([]); //remove when api is fixed
     } finally {
       setLoading(false);
     }
