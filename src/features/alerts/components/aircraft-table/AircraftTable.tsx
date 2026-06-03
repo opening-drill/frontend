@@ -37,7 +37,7 @@ export const  AircraftTable: React.FC = () => {
     try {
       setLoading(true);
       const aircraftData = await getAirCraftStatus();
-      setAircraft(aircraftData.data);
+      setAircraft(aircraftData?.data ?? []);
     } catch (err) {
       console.error("Failed to load aircraft:", err);
       setAircraft([]); //remove when api is fixed
@@ -87,7 +87,7 @@ export const  AircraftTable: React.FC = () => {
         <Box sx={{ height: 620, width: "100%" }}>
           <Loader isLoading={loading} timeOut={30}>
           <DataGrid
-            rows={config.formatAircraftData(aircraft)}
+            rows={config.formatAircraftData(aircraft ?? [])}
             columns={config.columns}
             getRowId={(row) => row.id}
             paginationModel={paginationModel}
