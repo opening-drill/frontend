@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAtomValue } from 'jotai';
-import { SignIn } from '../features/common/pages/SignIn';
+import { LogIn } from '../features/common/pages/LogIn';
 import { Onboarding } from '../features/common/pages/Onboarding';
 import { CommanderApp } from '../features/commander/CommanderApp';
 import { BaseOpsApp } from '../features/base-ops/BaseOpsApp';
@@ -30,7 +30,7 @@ const RootRouter: React.FC = () => {
         path="/login"
         element={
           <PublicRoute>
-            <SignIn />
+            <LogIn />
           </PublicRoute>
         }
       />
@@ -67,4 +67,3 @@ export const AppRouter: React.FC = () => {
     </BrowserRouter>
   );
 };
-

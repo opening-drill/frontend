@@ -45,7 +45,7 @@ const useStyles = makeStyles()((theme) => ({
   }
 }));
 
-export const SignIn: React.FC = () => {
+export const LogIn: React.FC = () => {
   const { classes } = useStyles();
   const navigate = useNavigate();
 
@@ -57,7 +57,7 @@ export const SignIn: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
@@ -71,9 +71,20 @@ export const SignIn: React.FC = () => {
       
       // Navigate to operational screen
       navigate('/');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Login error:', err);
-      const errMsg = err.response?.data?.message || err.message || 'Error logging in. Please try again.';
+      const errMsg =
+        (typeof err === 'object' &&
+        err !== null &&
+        'response' in err &&
+        typeof (err as { response?: { data?: { message?: string } } }).response?.data?.message === 'string'
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : typeof err === 'object' &&
+            err !== null &&
+            'message' in err &&
+            typeof (err as { message?: string }).message === 'string'
+          ? (err as { message?: string }).message
+          : null) || 'Error logging in. Please try again.';
       setError(errMsg);
     } finally {
       setLoading(false);
@@ -81,15 +92,14 @@ export const SignIn: React.FC = () => {
   };
 
   return (
-    <Box className={`${classes.container} fade-in`}>
+    <Box className={`${classes.container} fade-in`} dir="rtl">
       <Paper elevation={0} className={classes.paper}>
         <Typography component="h1" variant="h4" className={classes.title}>
-          Welcome Back
+          ברוכים הבאים
         </Typography>
         <Typography variant="body1" className={classes.subtitle}>
-          Sign in to access the command center
+          התחבר למרכז הבקרה
         </Typography>
-
         {error && (
           <Alert severity="error" sx={{ width: '100%', mb: 2 }} variant="outlined">
             {error}
@@ -97,16 +107,17 @@ export const SignIn: React.FC = () => {
         )}
 
         <form className={classes.form} onSubmit={handleSubmit} noValidate>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
+                <TextField
+                  variant="outlined"
+                  margin="normal"
+                  required
             fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
+            id="username"
+            label="שם משתמש"
+            name="username"
+            autoComplete="username"
             autoFocus
+            slotProps={{ htmlInput: { maxLength: 25 } }}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             disabled={loading}
@@ -117,10 +128,11 @@ export const SignIn: React.FC = () => {
             required
             fullWidth
             name="password"
-            label="Password"
+            label="סיסמה"
             type="password"
             id="password"
             autoComplete="current-password"
+            slotProps={{ htmlInput: { maxLength: 25 } }}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}
