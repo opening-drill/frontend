@@ -1,8 +1,9 @@
-import React from 'react';
-import { Box, Typography, AppBar, Toolbar, Grid, Paper } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Typography, AppBar, Toolbar, Grid, Paper, Button, Dialog } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 import { GenericMap } from '../map/components/GenericMap';
 import HubIcon from '@mui/icons-material/Hub';
+import AircraftTable from './components/aircraft-table/AircraftTable';
 
 const useStyles = makeStyles()((theme) => ({
   root: {
@@ -43,6 +44,7 @@ const useStyles = makeStyles()((theme) => ({
 
 export const AlertsApp: React.FC = () => {
   const { classes } = useStyles();
+  const [isAircraftTableOpen, setIsAircraftTableOpen] = useState(false)
 
   return (
     <Box className={classes.root}>
@@ -67,6 +69,9 @@ export const AlertsApp: React.FC = () => {
               <Typography variant="body2" color="textSecondary">
                 All systems nominal. Awaiting further tactical data.
               </Typography>
+              <Button sx={{width: 'fit-content'}} onClick={() => setIsAircraftTableOpen(true)}>
+                 open aircrafts table
+              </Button>
             </Paper>
           </Grid>
           <Grid size={{ xs: 12, md: 8 }}>
@@ -78,6 +83,9 @@ export const AlertsApp: React.FC = () => {
           </Grid>
         </Grid>
       </Box>
+      <Dialog open={isAircraftTableOpen} onClose={() => setIsAircraftTableOpen(false)}>
+        <AircraftTable/>
+      </Dialog>
     </Box>
   );
 };
