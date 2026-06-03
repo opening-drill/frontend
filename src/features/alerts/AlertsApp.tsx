@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Typography, AppBar, Toolbar, Grid, Paper, Dialog } from '@mui/material';
+import { Box, Typography, AppBar, Toolbar, Grid, Paper, Dialog, DialogTitle, Button, DialogActions } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 import { GenericMap } from '../map/components/GenericMap';
 import HubIcon from '@mui/icons-material/Hub';
@@ -100,15 +100,23 @@ export const AlertsApp: React.FC = () => {
       "Persistent surveillance recommended before strike.",
   },
 ];
+
   const handleAccept = (alert: AlertData) => {
-    const confirmed = window.confirm("Are you sure you want to attack?");
-    if (!confirmed) return;
+    setSelectedAlert(alert);
+    setOpenConfirm(true);
+  };
+
+  const confirm = (alert: AlertData) => {
+    if (!selectedAlert) return;
     approveAttackRequest({ eventId: alert.event_id, 
       aircraftId: alert.recommended_aircraft_id, 
       start: { latitude: alert.source.latitude, longitude: alert.source.longitude }, 
       end: { latitude: alert.target.latitude, longitude: alert.target.longitude }, 
-      urgency: alert.urgency_level })
+      urgency: alert.urgency_level });
+
     alerts.splice(alerts.findIndex(a => a.event_id === alert.event_id), 1);
+    setOpenConfirm(false);
+    setSelectedAlert(null);
   };
 
   const handleDecline = (alert: AlertData) => {
@@ -119,8 +127,15 @@ export const AlertsApp: React.FC = () => {
     setIsAircraftTableOpen(true)
   };
 
+  const cancel = () => {
+    setOpenConfirm(false);
+    setSelectedAlert(null);
+  };
+
   const [isAircraftTableOpen, setIsAircraftTableOpen] = useState(false)
-  
+  const [openConfirm, setOpenConfirm] = React.useState(false);
+  const [selectedAlert, setSelectedAlert] = React.useState<AlertData | null>(null);
+
   return (
     <Box className={classes.root}>
       <AppBar position="static" className={classes.appBar} elevation={0}>
@@ -164,6 +179,16 @@ export const AlertsApp: React.FC = () => {
         }}
         open={isAircraftTableOpen} onClose={() => setIsAircraftTableOpen(false)}>
         <AircraftTable setIsAircraftTableOpen={setIsAircraftTableOpen}/>
+      </Dialog>
+      <Dialog open={openConfirm} onClose={cancel}>
+        <DialogTitle>Are you sure you want to attack?</DialogTitle>
+
+        <DialogActions>
+          <Button onClick={cancel}>No</Button>
+          <Button onClick={() => selectedAlert ? confirm(selectedAlert) : undefined} color="error" variant="contained">
+            Yes
+          </Button>
+        </DialogActions>
       </Dialog>
     </Box>
   );
