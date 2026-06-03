@@ -64,7 +64,7 @@ const extractErrorMessage = (err: unknown): string => {
     return (err as { message?: string }).message as string;
   }
 
-  return 'Error logging in. Please try again.';
+  return 'שגיאה בהתחברות. נסה שוב.';
 };
 
 export const LogIn: React.FC = () => {
