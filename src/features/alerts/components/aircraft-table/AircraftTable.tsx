@@ -127,16 +127,7 @@ export const  AircraftTable = (props: { setIsAircraftTableOpen: React.Dispatch<R
       outline: "none !important",
     }}}
              onRowClick={(newSelection) => {
-                console.log('aa')
-                console.log(newSelection.row)
                 setSelectedAircraft(newSelection.row)
-        // setRowSelectionModel(newSelection);
-
-        // const selectedId = newSelection[0];
-        // const aircraft =
-        //   rows.find((row) => row.id === selectedId) ?? null;
-
-        // setSelectedAircraft(aircraft);
       }}
           />
           <Button sx={{ width: 'fit-content', color: selectedAircraft !== null ? 'blue' : 'grey' }} onClick={() => handleLaunch({ ...props.alert!, aircraft_type: selectedAircraft!.type.name })} disabled={!selectedAircraft || !props.alert}>
