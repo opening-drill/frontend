@@ -89,7 +89,7 @@ export const PhotoDialog: React.FC<PhotoDialogProps> = ({
                             צילום חוזר
                         </Button>
                         <Button className={classes.acceptButton} onClick={handleAccept} sx={{ width: '40%' }}>
-                            אישור
+                            אשר מטרה
                         </Button>
                     </Box>
                 </Box>
