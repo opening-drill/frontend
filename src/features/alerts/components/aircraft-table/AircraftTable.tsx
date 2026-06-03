@@ -49,7 +49,7 @@ export default function AircraftTable(props: { setIsAircraftTableOpen: React.Dis
       }}
     >
       {/* Header */}
-      <Box sx={{ mb: 3 }}>
+      <Box >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 0.5 }}>
           <FlightIcon sx={{ color: "#38bdf8", fontSize: 22, transform: "rotate(45deg)" }} />
           <Typography
@@ -115,12 +115,15 @@ export default function AircraftTable(props: { setIsAircraftTableOpen: React.Dis
             setSelectedAircraft(isSelected ? null : newSelection.row)
           }}
         />
+        <Box sx={{display: 'flex', flexDirection: 'row', mt: 0.7}}>
+
         <Button sx={{ width: 'fit-content', color: selectedAircraft !== null ? 'blue' : 'grey' }} onClick={() => props.setIsAircraftTableOpen(false)} disabled={selectedAircraft === null}>
           launch
         </Button>
         <Button sx={{ width: 'fit-content' }} onClick={() => props.setIsAircraftTableOpen(false)}>
           cancel
         </Button>
+        </Box>
       </Box>
     </Box>
   );
