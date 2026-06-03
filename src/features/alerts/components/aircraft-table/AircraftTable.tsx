@@ -1,3 +1,4 @@
+import styles from "./AircraftTable.module.css";
 import { useState } from "react";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import {
@@ -115,15 +116,14 @@ export default function AircraftTable(props: { setIsAircraftTableOpen: React.Dis
             setSelectedAircraft(isSelected ? null : newSelection.row)
           }}
         />
-        <Box sx={{display: 'flex', flexDirection: 'row', mt: 0.7}}>
-
-        <Button sx={{ width: 'fit-content', color: selectedAircraft !== null ? 'blue' : 'grey' }} onClick={() => props.setIsAircraftTableOpen(false)} disabled={selectedAircraft === null}>
-          launch
-        </Button>
-        <Button sx={{ width: 'fit-content' }} onClick={() => props.setIsAircraftTableOpen(false)}>
-          cancel
-        </Button>
-        </Box>
+        <div className={styles.actions}>
+          <button className={styles.acceptBtn} style={{ color: selectedAircraft === null ? 'grey' : '' }} onClick={() => props.setIsAircraftTableOpen(false)} disabled={selectedAircraft === null}>
+            launch
+          </button>
+          <button className={styles.declineBtn} onClick={() => props.setIsAircraftTableOpen(false)}>
+            cancel
+          </button>
+        </div>
       </Box>
     </Box>
   );

@@ -18,7 +18,7 @@ const columns: GridColDef[] = [
     headerName: "ID",
     width: 100,
     renderCell: (params: GridRenderCellParams) => (
-      <Typography sx={{ fontFamily: "'DM Mono', monospace", fontSize: "0.78rem", color: "#64748b", letterSpacing: "0.05em" }}>
+      <Typography sx={{ fontFamily: "'DM Mono', monospace", fontSize: "0.78rem", color: "#64748b", letterSpacing: "0.05em", display: 'flex', alignItems: 'center', height: '100%' }}>
         {params.value}
       </Typography>
     ),
@@ -28,7 +28,7 @@ const columns: GridColDef[] = [
     headerName: "Aircraft Name",
     width: 210,
     renderCell: (params: GridRenderCellParams) => (
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, height: '100%' }}>
         <FlightIcon sx={{ fontSize: 14, color: "#38bdf8", opacity: 0.7, transform: "rotate(45deg)" }} />
         <Typography sx={{ fontWeight: 600, fontSize: "0.85rem", color: "#e2e8f0" }}>{params.value}</Typography>
       </Box>
@@ -39,7 +39,7 @@ const columns: GridColDef[] = [
     headerName: "Type",
     width: 190,
     renderCell: (params: GridRenderCellParams) => (
-      <Typography sx={{ fontSize: "0.82rem", color: "#94a3b8" }}>{params.value}</Typography>
+      <Typography sx={{ fontSize: "0.82rem", color: "#94a3b8", display: 'flex', alignItems: 'center', height: '100%' }}>{params.value}</Typography>
     ),
   },
   {
@@ -50,7 +50,7 @@ const columns: GridColDef[] = [
     valueFormatter: (value: number) =>
       value === 0 ? "Museum Piece" : `$${(value / 1_000_000).toFixed(1)}M`,
     renderCell: (params: GridRenderCellParams) => (
-      <Typography sx={{ fontFamily: "'DM Mono', monospace", fontSize: "0.85rem", color: params.value === 0 ? "#64748b" : "#a3e635", fontWeight: 500 }}>
+      <Typography sx={{ fontFamily: "'DM Mono', monospace", fontSize: "0.85rem", color: params.value === 0 ? "#64748b" : "#a3e635", fontWeight: 500, display: 'flex', alignItems: 'center', height: '100%' }}>
         {params.value === 0 ? "Museum Piece" : `$${(params.value / 1_000_000).toFixed(1)}M`}
       </Typography>
     ),
@@ -60,7 +60,7 @@ const columns: GridColDef[] = [
     headerName: "Location",
     width: 190,
     renderCell: (params: GridRenderCellParams) => (
-      <Typography sx={{ fontSize: "0.82rem", color: "#cbd5e1" }}>{params.value}</Typography>
+      <Typography sx={{ fontSize: "0.82rem", color: "#cbd5e1", display: 'flex', alignItems: 'center', height: '100%' }}>{params.value}</Typography>
     ),
   },
   {
