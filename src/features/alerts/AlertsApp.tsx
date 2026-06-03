@@ -5,6 +5,7 @@ import { GenericMap } from '../map/components/GenericMap';
 import HubIcon from '@mui/icons-material/Hub';
 import AttackCardList from './components/open-alerts/OpenAlerts';
 import type { AlertData } from '../../types/hamel';
+import { approveAttackRequest } from '../../core/server/api/approveAttackRequest';
 
 const useStyles = makeStyles()((theme) => ({
   root: {
@@ -19,23 +20,22 @@ const useStyles = makeStyles()((theme) => ({
   },
   content: {
     flexGrow: 1,
-    padding: theme.spacing(3),
     display: 'flex',
     flexDirection: 'column',
   },
   dashboardGrid: {
-    marginTop: theme.spacing(3),
+    marginTop: theme.spacing(1),
+
   },
   paper: {
-    padding: theme.spacing(2),
-    height: '100%',
-    overflowY: 'auto',
+    padding: theme.spacing(1),
+    height: 'calc(100vh - 100px)',
     background: theme.palette.background.paper,
     border: `1px solid rgba(255, 255, 255, 0.05)`,
     borderRadius: theme.shape.borderRadius,
   },
   mapContainer: {
-    height: '500px',
+    height: 'calc(100vh - 100px)',
     display: 'flex',
     flexGrow: 1,
     minHeight: 400, 
@@ -44,30 +44,18 @@ const useStyles = makeStyles()((theme) => ({
 
 export const AlertsApp: React.FC = () => {
   const { classes } = useStyles();
-
-  const handleAccept = (alert: AlertData) => {
-    console.log("ACCEPT", alert.event_id);
-  };
-
-  const handleDecline = (alert: AlertData) => {
-    console.log("DECLINE", alert.event_id);
-  };
-
-  const handleChooseAnother = (alert: AlertData) => {
-    console.log(
-      "CHANGE AIRCRAFT",
-      alert.event_id,
-      alert.recommended_aircraft_id
-    );
-  };
   const alerts: AlertData[] = [
   {
     event_id: "evt-001",
     received_alert_time: "2026-06-03T14:32:10Z",
-
+    source: {
+      latitude: 31.7683,
+      longitude: 35.2137,
+      name: "Enemy Tank Column",
+    },
     target: {
-      lat: 31.7683,
-      lng: 35.2137,
+      latitude: 31.7683,
+      longitude: 35.2137,
       name: "Enemy Tank Column",
     },
 
@@ -85,10 +73,14 @@ export const AlertsApp: React.FC = () => {
   {
     event_id: "evt-002",
     received_alert_time: "2026-06-03T14:35:22Z",
-
+    source: {
+      latitude: 32.0853,
+      longitude: 34.7818,
+      name: "Missile Launcher",
+    },
     target: {
-      lat: 32.0853,
-      lng: 34.7818,
+      latitude: 32.0853,
+      longitude: 34.7818,
       name: "Missile Launcher",
     },
 
@@ -104,24 +96,44 @@ export const AlertsApp: React.FC = () => {
       "Persistent surveillance recommended before strike.",
   },
 ];
+  const handleAccept = (alert: AlertData) => {
+    const confirmed = window.confirm("Are you sure you want to attack?");
+    if (!confirmed) return;
+    approveAttackRequest({ eventId: alert.event_id, 
+      aircraftId: alert.recommended_aircraft_id, 
+      start: { latitude: alert.source.latitude, longitude: alert.source.longitude }, 
+      end: { latitude: alert.target.latitude, longitude: alert.target.longitude }, 
+      urgency: alert.urgency_level })
+    alerts.splice(alerts.findIndex(a => a.event_id === alert.event_id), 1);
+  };
+
+  const handleDecline = (alert: AlertData) => {
+    alerts.splice(alerts.findIndex(a => a.event_id === alert.event_id), 1);
+  };
+
+  const handleChooseAnother = (alert: AlertData) => {
+    console.log(
+      "CHANGE AIRCRAFT",
+      alert.event_id,
+      alert.recommended_aircraft_id
+    );
+  };
+
   return (
     <Box className={classes.root}>
       <AppBar position="static" className={classes.appBar} elevation={0}>
         <Toolbar>
           <HubIcon sx={{ mr: 2, color: 'secondary.main' }} />
           <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 'bold' }}>
-            Base of Operations
+            Aircraft
           </Typography>
         </Toolbar>
       </AppBar>
       <Box className={`${classes.content} fade-in`}>
-        <Typography variant="h4" gutterBottom>
-          Global Logistics & Overview
-        </Typography>
         <Grid container spacing={3} className={classes.dashboardGrid}>
           <Grid size={{ xs: 12, md: 4 }}>
             <Paper className={classes.paper} elevation={0}>
-              <h1>Open Alerts ({alerts.length})</h1>
+              <h3>Open Alerts ({alerts.length})</h3>
               <AttackCardList
                 alerts={alerts}
                 onAccept={handleAccept}

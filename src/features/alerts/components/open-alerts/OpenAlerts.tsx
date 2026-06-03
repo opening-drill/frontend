@@ -23,21 +23,20 @@ export default function AttackCardList({
   };
 
   return (
-    <div className={styles.container}>
-      {alerts.map((alert) => (
-        <div
-          key={alert.event_id}
-          onClick={() => handleToggle(alert.event_id)}
-        >
-          <AttackCard
-            alert={alert}
-            open={openId === alert.event_id}
-            onAccept={onAccept}
-            onDecline={onDecline}
-            onChooseAnother={onChooseAnother}
-          />
-        </div>
-      ))}
-    </div>
+      <div className={styles.container}>
+        {alerts.map((alert) => (
+          <div
+            key={alert.event_id}
+            onClick={() => handleToggle(alert.event_id)}>
+            <AttackCard
+              alert={alert}
+              open={openId === alert.event_id}
+              onAccept={onAccept}
+              onDecline={onDecline}
+              onChooseAnother={onChooseAnother}
+            />
+          </div>
+        ))}
+      </div>
   );
 }

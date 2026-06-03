@@ -34,7 +34,7 @@ export default function AttackCard({
   return (
     <div className={styles.card}>
       <div className={styles.header}>
-        <h3>{alert.target.name ?? "Unknown Target"}</h3>
+        <h4>{alert.target.name ?? "Unknown Target"}</h4>
 
         <span className={styles.time}>
           {new Date(alert.received_alert_time).toLocaleTimeString()}
@@ -56,7 +56,7 @@ export default function AttackCard({
         <div>
           <span className={styles.label}>Coordinates:</span>
           <span>
-            {alert.target.lat.toFixed(4)}, {alert.target.lng.toFixed(4)}
+            {alert.target.latitude.toFixed(4)}, {alert.target.longitude.toFixed(4)}
           </span>
         </div>
 
