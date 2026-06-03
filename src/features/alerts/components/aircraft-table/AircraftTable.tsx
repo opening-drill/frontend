@@ -2,12 +2,22 @@ import { useState } from "react";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import {
   Box,
+  Button,
   Typography,
 } from "@mui/material";
 import FlightIcon from "@mui/icons-material/Flight";
 import config from './AircraftTable.config';
 
-const rows = [
+type Aircraft = {
+  id: string,
+  name: string
+  type: string
+  price: number
+  location: string
+  status: string
+}
+
+const rows: Aircraft[] = [
   { id: "AC-001", name: "Boeing 737 MAX", type: "Commercial Airliner", price: 121_900_000, location: "Chicago O'Hare", status: "Available" },
   { id: "AC-002", name: "Airbus A320neo", type: "Commercial Airliner", price: 101_000_000, location: "Paris CDG", status: "In Service" },
   { id: "AC-003", name: "Cessna Citation X+", type: "Business Jet", price: 23_000_000, location: "Teterboro, NJ", status: "Available" },
@@ -25,75 +35,93 @@ const rows = [
   { id: "AC-015", name: "Boeing 787-9", type: "Wide-body Airliner", price: 292_500_000, location: "Tokyo Haneda", status: "Reserved" },
 ];
 
-export default function AircraftTable() {
-  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
-  const [selectedAircraft, setSelectedAircraft] = useState(null);
+export default function AircraftTable(props: { setIsAircraftTableOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
+  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
+  const [selectedAircraft, setSelectedAircraft] = useState<Aircraft | null>(null);
 
   return (
-      <Box
-        sx={{
-          height: "100vh",
-          backgroundColor: "#0a0f1e",
-          backgroundImage: "radial-gradient(ellipse at 20% 10%, rgba(56,189,248,0.05) 0%, transparent 60%), radial-gradient(ellipse at 80% 80%, rgba(99,102,241,0.04) 0%, transparent 60%)",
-          p: { xs: 2, md: 4 },
-          fontFamily: "'DM Mono', monospace",
-        }}
-      >
-        {/* Header */}
-        <Box sx={{ mb: 3 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 0.5 }}>
-            <FlightIcon sx={{ color: "#38bdf8", fontSize: 22, transform: "rotate(45deg)" }} />
-            <Typography
-              variant="h5"
-              sx={{
-                fontFamily: "'DM Mono', monospace",
-                fontWeight: 700,
-                color: "#f1f5f9",
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                fontSize: "1.1rem",
-              }}
-            >
-              Aircraft Registry
-            </Typography>
-          </Box>
-          <Typography sx={{ color: "#475569", fontSize: "0.78rem", letterSpacing: "0.06em", pl: "34px" }}>
-            {rows.length} aircraft · sortable · filterable
+    <Box
+      sx={{
+        backgroundColor: "#0a0f1e",
+        backgroundImage: "radial-gradient(ellipse at 20% 10%, rgba(56,189,248,0.05) 0%, transparent 60%), radial-gradient(ellipse at 80% 80%, rgba(99,102,241,0.04) 0%, transparent 60%)",
+        p: { xs: 2, md: 4 },
+        fontFamily: "'DM Mono', monospace",
+      }}
+    >
+      {/* Header */}
+      <Box sx={{ mb: 3 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 0.5 }}>
+          <FlightIcon sx={{ color: "#38bdf8", fontSize: 22, transform: "rotate(45deg)" }} />
+          <Typography
+            variant="h5"
+            sx={{
+              fontFamily: "'DM Mono', monospace",
+              fontWeight: 700,
+              color: "#f1f5f9",
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              fontSize: "1.1rem",
+            }}
+          >
+            Aircraft Registry
           </Typography>
         </Box>
-
-        {/* Grid */}
-        <Box sx={{ height: 380, width: "100%" }}>
-          <DataGrid
-            rows={rows}
-            columns={config.columns}
-            getRowId={(row) => row.id}
-            paginationModel={paginationModel}
-            onPaginationModelChange={setPaginationModel}
-            pageSizeOptions={[5, 10, 15]}
-            slots={{ toolbar: GridToolbar }}
-            slotProps={{
-              toolbar: {
-                showQuickFilter: true,
-                quickFilterProps: { debounceMs: 300 },
-              },
-            }}
-            disableRowSelectionOnClick
-            sx={{ border: "none" }}
-             onRowClick={(newSelection) => {
-                console.log('aa')
-                console.log(newSelection.row)
-                setSelectedAircraft(newSelection.row)
-        // setRowSelectionModel(newSelection);
-
-        // const selectedId = newSelection[0];
-        // const aircraft =
-        //   rows.find((row) => row.id === selectedId) ?? null;
-
-        // setSelectedAircraft(aircraft);
-      }}
-          />
-        </Box>
+        <Typography sx={{ color: "#475569", fontSize: "0.78rem", letterSpacing: "0.06em", pl: "34px" }}>
+          {rows.length} aircraft · sortable · filterable
+        </Typography>
       </Box>
+
+      {/* Grid */}
+      <Box sx={{ height: '90%', width: "100%" }}>
+        <DataGrid
+          rows={rows}
+          columns={config.columns}
+          getRowId={(row) => row.id}
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
+          pageSizeOptions={[5, 10, 15]}
+          slots={{ toolbar: GridToolbar }}
+          slotProps={{
+            toolbar: {
+              showQuickFilter: true,
+              quickFilterProps: { debounceMs: 300 },
+            },
+          }}
+          autoHeight
+          sx={{
+            border: "none",
+
+            "& .MuiDataGrid-row.Mui-selected": {
+              backgroundColor: "rgba(56,189,248,0.18)",
+            },
+
+            "& .MuiDataGrid-row.Mui-selected:hover": {
+              backgroundColor: "rgba(56,189,248,0.25)",
+            },
+
+            "& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within": {
+              outline: "none !important",
+            },
+
+            "& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within": {
+              outline: "none !important",
+            }
+          }}
+          onRowClick={(newSelection) => {
+            console.log('aa')
+            console.log(newSelection)
+            const isSelected = newSelection.row?.id === selectedAircraft?.id;
+            console.log(isSelected)
+            setSelectedAircraft(isSelected ? null : newSelection.row)
+          }}
+        />
+        <Button sx={{ width: 'fit-content', color: selectedAircraft !== null ? 'blue' : 'grey' }} onClick={() => props.setIsAircraftTableOpen(false)} disabled={selectedAircraft === null}>
+          launch
+        </Button>
+        <Button sx={{ width: 'fit-content' }} onClick={() => props.setIsAircraftTableOpen(false)}>
+          cancel
+        </Button>
+      </Box>
+    </Box>
   );
 }
