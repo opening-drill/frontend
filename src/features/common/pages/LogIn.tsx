@@ -41,29 +41,45 @@ const useStyles = makeStyles()((theme) => ({
   }
 }));
 
-export const SignIn: React.FC = () => {
+export const LogIn: React.FC = () => {
   const { classes } = useStyles();
+  const [username, setUsername] = React.useState('');
+  const [password, setPassword] = React.useState('');
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Dummy function showing the username and password in console & alert
+    console.log('Dummy Auth Success:', { username, password });
+    alert(`נשלח לפונקציית התחברות:\nמשתמש: ${username}\nסיסמה: ${password}`);
+
+    // Proceed to redirect
+    window.location.href = '/';
+  };
 
   return (
-    <Box className={`${classes.container} fade-in`}>
+    <Box className={`${classes.container} fade-in`} dir="rtl">
       <Paper elevation={0} className={classes.paper}>
         <Typography component="h1" variant="h4" className={classes.title}>
-          Welcome Back
+          ברוכים הבאים
         </Typography>
         <Typography variant="body1" className={classes.subtitle}>
-          Sign in to access the command center
+          התחבר למרכז הבקרה
         </Typography>
-        <form className={classes.form} noValidate>
+        <form className={classes.form} onSubmit={handleLogin} noValidate>
           <TextField
             variant="outlined"
             margin="normal"
             required
             fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
+            id="username"
+            label="שם משתמש"
+            name="username"
+            autoComplete="username"
             autoFocus
+            slotProps={{ htmlInput: { maxLength: 25 } }}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
           <TextField
             variant="outlined"
@@ -71,20 +87,22 @@ export const SignIn: React.FC = () => {
             required
             fullWidth
             name="password"
-            label="Password"
+            label="סיסמה"
             type="password"
             id="password"
             autoComplete="current-password"
+            slotProps={{ htmlInput: { maxLength: 25 } }}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
           <Button
-            type="button"
+            type="submit"
             fullWidth
             variant="contained"
             color="primary"
             className={classes.submit}
-            onClick={() => window.location.href = '/'}
           >
-            Sign In
+            התחבר
           </Button>
         </form>
       </Paper>
