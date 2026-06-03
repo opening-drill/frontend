@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { SignIn } from '../features/common/pages/SignIn';
+import { LogIn } from '../features/common/pages/LogIn';
 import { Onboarding } from '../features/common/pages/Onboarding';
 import { CommanderApp } from '../features/commander/CommanderApp';
 import { BaseOpsApp } from '../features/base-ops/BaseOpsApp';
@@ -12,7 +12,7 @@ const RootRouter: React.FC = () => {
   return (
     <Routes>
       {/* Shared Routes */}
-      <Route path="/login" element={<SignIn />} />
+      <Route path="/login" element={<LogIn />} />
       <Route path="/onboarding" element={<Onboarding />} />
       
       {/* Device-specific Root Route */}

@@ -41,17 +41,17 @@ const useStyles = makeStyles()((theme) => ({
   }
 }));
 
-export const SignIn: React.FC = () => {
+export const LogIn: React.FC = () => {
   const { classes } = useStyles();
 
   return (
     <Box className={`${classes.container} fade-in`}>
       <Paper elevation={0} className={classes.paper}>
         <Typography component="h1" variant="h4" className={classes.title}>
-          Welcome Back
+          ברוכים הבאים
         </Typography>
         <Typography variant="body1" className={classes.subtitle}>
-          Sign in to access the command center
+          התחבר למרכז הבקרה
         </Typography>
         <form className={classes.form} noValidate>
           <TextField
@@ -59,10 +59,10 @@ export const SignIn: React.FC = () => {
             margin="normal"
             required
             fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
+            id="username"
+            label="שם משתמש"
+            name="username"
+            autoComplete="username"
             autoFocus
           />
           <TextField
@@ -71,7 +71,7 @@ export const SignIn: React.FC = () => {
             required
             fullWidth
             name="password"
-            label="Password"
+            label="סיסמה"
             type="password"
             id="password"
             autoComplete="current-password"
@@ -84,7 +84,7 @@ export const SignIn: React.FC = () => {
             className={classes.submit}
             onClick={() => window.location.href = '/'}
           >
-            Sign In
+            התחבר
           </Button>
         </form>
       </Paper>
