@@ -21,8 +21,8 @@ const useStyles = makeStyles()((theme) => ({
     borderRadius: '16px',
     boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.25)',
     padding: '36px 20px 16px 20px', // Top padding pushed down so text starts below the 'x' button
-    minWidth: '300px',
-    maxWidth: '340px',
+    minWidth: '340px',
+    maxWidth: '400px',
     display: 'flex',
     flexDirection: 'column',
     gap: theme.spacing(0.75),

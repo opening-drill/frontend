@@ -19,17 +19,24 @@ const useStyles = makeStyles()((theme) => ({
   },
   toastContainer: {
     position: 'fixed' as any,
-    top: '24px !important',
+    top: '90px !important', // Moved down to appear below the TopBar
     left: '50% !important',
     transform: 'translateX(-50%) !important',
     padding: '0 !important',
-    width: '340px !important',
+    width: '420px !important',
+    maxWidth: '95vw !important',
     zIndex: 99999,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+    // Override the native react-toastify variables for the progress bar color
+    '--toastify-color-progress-light': 'rgba(255, 255, 255, 0.4)',
+    '--toastify-color-progress-dark': 'rgba(255, 255, 255, 0.4)',
+    '--toastify-color-progress-default': 'rgba(255, 255, 255, 0.4)',
+    '--toastify-color-progress-success': '#2ecc71',
+    '--toastify-color-progress-error': '#ff3b30',
     '& .Toastify__toast': {
-      width: '100% !important',
+      width: 'max-content !important', // Shrink-wrap the exact width of the ChiefToast card
       background: 'none !important',
       boxShadow: 'none !important',
       padding: '0 !important',
@@ -45,6 +52,13 @@ const useStyles = makeStyles()((theme) => ({
       margin: '0 !important',
       display: 'flex',
       justifyContent: 'center',
+    },
+    '& .Toastify__progress-bar': {
+      height: '8px !important',
+      bottom: '0 !important',
+      borderBottomLeftRadius: '16px',
+      borderBottomRightRadius: '16px',
+      zIndex: 10,
     },
   },
   testControls: {

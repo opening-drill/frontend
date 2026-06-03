@@ -49,7 +49,6 @@ export const ChiefToastProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       // Add the newest toast on top of the stack
       setNotifications((prev) => [newItem, ...prev]);
 
-      // Show toast – no cooldown, auto‑close after 10 s, custom progress bar inside component
       toast(
         ({ closeToast }) => (
           <ChiefToast
@@ -67,6 +66,8 @@ export const ChiefToastProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           pauseOnHover: true,
           draggable: true,
           closeButton: false,
+          icon: false,
+          type: type === 'approved' ? 'success' : 'error',
         }
       );
     },
