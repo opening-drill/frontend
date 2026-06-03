@@ -40,7 +40,7 @@ const useStyles = makeStyles()((theme) => ({
   }
 }));
 
-export const CommanderApp: React.FC = () => {
+export const ChiefApp: React.FC = () => {
   const { classes } = useStyles();
 
   return (
@@ -66,10 +66,10 @@ export const CommanderApp: React.FC = () => {
             {['Dashboard', 'Units', 'Tactical Map'].map((text, index) => (
               <ListItem disablePadding key={text}>
                 <ListItemButton>
-                <ListItemIcon sx={{ color: 'primary.main' }}>
-                  {index === 0 ? <DashboardIcon /> : index === 1 ? <SecurityIcon /> : <MapIcon />}
-                </ListItemIcon>
-                <ListItemText primary={text} />
+                  <ListItemIcon sx={{ color: 'primary.main' }}>
+                    {index === 0 ? <DashboardIcon /> : index === 1 ? <SecurityIcon /> : <MapIcon />}
+                  </ListItemIcon>
+                  <ListItemText primary={text} />
                 </ListItemButton>
               </ListItem>
             ))}
