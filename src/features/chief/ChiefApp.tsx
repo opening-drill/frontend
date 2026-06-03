@@ -1,3 +1,5 @@
+import { OpenCameraButton } from './components/openCameraButton';
+
 import { useEffect, useRef } from 'react';
 import { makeStyles } from 'tss-react/mui';
 import { useDeviceLocation } from '../../core/store/atoms/locationAtom';
@@ -11,12 +13,24 @@ import React from 'react';
 import { Slide, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ChiefToastProvider } from './context/ChiefToastContext';
-  
+
 const useStyles = makeStyles()((theme) => ({
   root: {
     display: 'flex',
-    height: '100vh',
-    position: 'relative'
+    height: '100dvh',
+    width: '100vw',
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  cameraButtonContainer: {
+    position: 'fixed',
+    bottom: 55,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    zIndex: 1000,
+    [theme.breakpoints.down('sm')]: {
+      bottom: 30,
+    }
   },
   toastContainer: {
     position: 'fixed' as any,
@@ -119,6 +133,10 @@ const ChiefAppContent: React.FC = () => {
     <Box className={classes.root}>
       <TopBar />
       <GenericMap />
+
+      <Box className={classes.cameraButtonContainer}>
+        <OpenCameraButton />
+      </Box>
       <NotificationCenter />
 
       {/* Toast notifications container */}
