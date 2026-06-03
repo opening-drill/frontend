@@ -1,7 +1,7 @@
-import React from 'react';
-import { Box, Typography, IconButton } from '@mui/material';
-import { makeStyles } from 'tss-react/mui';
 import CloseIcon from '@mui/icons-material/Close';
+import { Box, IconButton, Typography } from '@mui/material';
+import React from 'react';
+import { makeStyles } from 'tss-react/mui';
 
 export interface ChiefToastProps {
   type: 'approved' | 'cancelled';
@@ -21,8 +21,8 @@ const useStyles = makeStyles()((theme) => ({
     borderRadius: '16px',
     boxShadow: '0px 8px 24px rgba(0, 0, 0, 0.25)',
     padding: '36px 20px 16px 20px', // Top padding pushed down so text starts below the 'x' button
-    minWidth: '300px',
-    maxWidth: '340px',
+    minWidth: '340px',
+    maxWidth: '400px',
     display: 'flex',
     flexDirection: 'column',
     gap: theme.spacing(0.75),
@@ -150,13 +150,6 @@ export const ChiefToast: React.FC<ChiefToastProps> = ({
           </Typography>
         )}
       </Box>
-
-      {duration && (
-        <Box
-          className={classes.progressBar}
-          style={{ animationDuration: `${duration}ms` }}
-        />
-      )}
     </Box>
   );
 };

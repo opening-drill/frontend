@@ -1,9 +1,13 @@
-import React from 'react';
-import { Box, Button } from '@mui/material';
+import { useEffect, useRef } from 'react';
 import { makeStyles } from 'tss-react/mui';
-import { GenericMap } from '../map/components/GenericMap';
-import { CoordinatePill } from './components/CoordinatePill';
-import { ToastContainer, Slide } from 'react-toastify';
+import { useDeviceLocation } from '../../core/store/atoms/locationAtom';
+import GenericMap from '../map/components/GenericMap';
+import { useMap } from '../map/MapProvider';
+import { TopBar } from './components/TopBar';
+
+import { Box, Button } from '@mui/material';
+import React from 'react';
+import { Slide, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ChiefToastProvider, useChiefToast } from './context/ChiefToastContext';
   
@@ -15,17 +19,24 @@ const useStyles = makeStyles()((theme) => ({
   },
   toastContainer: {
     position: 'fixed' as any,
-    top: '24px !important',
+    top: '90px !important', // Moved down to appear below the TopBar
     left: '50% !important',
     transform: 'translateX(-50%) !important',
     padding: '0 !important',
-    width: '340px !important',
+    width: '420px !important',
+    maxWidth: '95vw !important',
     zIndex: 99999,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+    // Override the native react-toastify variables for the progress bar color
+    '--toastify-color-progress-light': 'rgba(255, 255, 255, 0.4)',
+    '--toastify-color-progress-dark': 'rgba(255, 255, 255, 0.4)',
+    '--toastify-color-progress-default': 'rgba(255, 255, 255, 0.4)',
+    '--toastify-color-progress-success': '#2ecc71',
+    '--toastify-color-progress-error': '#ff3b30',
     '& .Toastify__toast': {
-      width: '100% !important',
+      width: 'max-content !important', // Shrink-wrap the exact width of the ChiefToast card
       background: 'none !important',
       boxShadow: 'none !important',
       padding: '0 !important',
@@ -41,6 +52,13 @@ const useStyles = makeStyles()((theme) => ({
       margin: '0 !important',
       display: 'flex',
       justifyContent: 'center',
+    },
+    '& .Toastify__progress-bar': {
+      height: '8px !important',
+      bottom: '0 !important',
+      borderBottomLeftRadius: '16px',
+      borderBottomRightRadius: '16px',
+      zIndex: 10,
     },
   },
   testControls: {
@@ -67,8 +85,35 @@ const useStyles = makeStyles()((theme) => ({
 
 const ChiefAppContent: React.FC = () => {
   const { classes } = useStyles();
-  const { addNotification, cooldownRemaining } = useChiefToast();
-  const isCooldownActive = cooldownRemaining > 0;
+  const { location } = useDeviceLocation();
+  const { goToLocation } = useMap();
+
+  const lastUpdateRef = useRef<number>(0);
+
+  // Throttled effect to track location movements and heading
+  useEffect(() => {
+    if (location.latitude && location.longitude) {
+      const now = Date.now();
+      const timeSinceLastUpdate = now - lastUpdateRef.current;
+      let timeoutId: ReturnType<typeof setTimeout>;
+
+      const executeUpdate = () => {
+        goToLocation([location.longitude!, location.latitude!], 19.5, location.heading ?? undefined);
+        lastUpdateRef.current = Date.now();
+      };
+
+      if (timeSinceLastUpdate >= 1000) {
+        executeUpdate();
+      } else {
+        timeoutId = setTimeout(executeUpdate, 1000 - timeSinceLastUpdate);
+      }
+
+      return () => {
+        if (timeoutId) clearTimeout(timeoutId);
+      };
+    }
+  }, [location.latitude, location.longitude, location.heading, goToLocation]);
+  const { addNotification } = useChiefToast();
 
   const triggerApproved = () => {
     addNotification('approved', '123747,777886', '13:56:20');
@@ -80,7 +125,7 @@ const ChiefAppContent: React.FC = () => {
 
   return (
     <Box className={classes.root}>
-      <CoordinatePill />
+      <TopBar />
       <GenericMap />
 
       {/* Floating panel with test buttons */}
@@ -90,18 +135,18 @@ const ChiefAppContent: React.FC = () => {
           color="success"
           onClick={triggerApproved}
           className={classes.testButton}
-          disabled={isCooldownActive}
+          disabled={false}
         >
-          {isCooldownActive ? `המתן ${cooldownRemaining} ש'` : 'שגר דיווח: אושר'}
+          שגר דיווח: אושר
         </Button>
         <Button
           variant="contained"
           color="error"
           onClick={triggerCancelled}
           className={classes.testButton}
-          disabled={isCooldownActive}
+          disabled={false}
         >
-          {isCooldownActive ? `המתן ${cooldownRemaining} ש'` : 'שגר דיווח: בוטל'}
+          שגר דיווח: בוטל
         </Button>
       </Box>
 

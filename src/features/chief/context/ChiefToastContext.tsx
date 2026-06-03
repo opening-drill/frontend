@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useCallback, useContext, useState } from 'react';
 import { toast } from 'react-toastify';
 import { ChiefToast } from '../components/ChiefToast';
 
@@ -49,7 +49,6 @@ export const ChiefToastProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       // Add the newest toast on top of the stack
       setNotifications((prev) => [newItem, ...prev]);
 
-      // Show toast – no cooldown, auto‑close after 10 s, custom progress bar inside component
       toast(
         ({ closeToast }) => (
           <ChiefToast
@@ -63,11 +62,12 @@ export const ChiefToastProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         {
           toastId: id,
           autoClose: TOAST_DURATION,
-          hideProgressBar: true, // we render our own progress bar
           closeOnClick: false,
           pauseOnHover: true,
           draggable: true,
           closeButton: false,
+          icon: false,
+          type: type === 'approved' ? 'success' : 'error',
         }
       );
     },
