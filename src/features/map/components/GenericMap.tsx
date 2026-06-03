@@ -279,6 +279,49 @@ const getFeatureStyle = (color: string, isAttack = false) => {
   });
 };
 
+const getAircraftStyle = (aircraft: AircraftLive): Style => {
+  let color = '#10b981'; // free (emerald/teal)
+  if (aircraft.status === 'busy') {
+    color = '#f59e0b'; // busy (amber/orange)
+  } else if (aircraft.status === 'broken') {
+    color = '#ef4444'; // broken (coral/red)
+  }
+
+  // Sleek military/tactical UAV/drone SVG icon pointing North (0 degrees)
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" fill="none">
+      <circle cx="18" cy="18" r="15" stroke="${color}" stroke-opacity="0.3" stroke-width="1.5" fill="${color}" fill-opacity="0.1"/>
+      <path d="M18 6 L12 28 L18 23 L24 28 Z" fill="${color}" stroke="#1e293b" stroke-width="1.5" stroke-linejoin="round"/>
+      <path d="M18 6 L18 13" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      `;
+      
+  const svgDataUri = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+  const rotationRad = (aircraft.heading_degrees * Math.PI) / 180;
+
+  return new Style({
+    image: new Icon({
+      src: svgDataUri,
+      scale: 1.0,
+      rotation: rotationRad,
+      anchor: [0.5, 0.5],
+    }),
+    text: new Text({
+      text: `${aircraft.aircraft_type}\n(${aircraft.altitude}m | ${aircraft.horizontal_speed_mps}m/s)`,
+      font: 'bold 11px Inter, Roboto, Helvetica Neue, sans-serif',
+      fill: new Fill({
+        color: '#ffffff',
+      }),
+      stroke: new Stroke({
+        color: 'rgba(18, 24, 38, 0.85)',
+        width: 3.5,
+      }),
+      offsetY: 28,
+    }),
+    });
+    };
+      
+      
 const GenericMap = () => {
   const { classes } = useStyles();
   const { mapRef } = useMap();
@@ -569,7 +612,7 @@ const GenericMap = () => {
         }
         // Update properties, styles, and orientation
         feature.setProperties(aircraft);
-        // feature.setStyle(getAircraftStyle(aircraft));
+        feature.setStyle(getAircraftStyle(aircraft));
       } else {
         // Create a new feature for the new aircraft
         const newFeature = new Feature({
@@ -577,7 +620,7 @@ const GenericMap = () => {
         });
         newFeature.setId(aircraft.aircraft_id);
         newFeature.setProperties(aircraft);
-        //newFeature.setStyle(getAircraftStyle(aircraft));
+        newFeature.setStyle(getAircraftStyle(aircraft));
         source.addFeature(newFeature);
       }
     });
