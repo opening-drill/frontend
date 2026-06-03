@@ -7,7 +7,7 @@ import {
 } from '../core/server/socket';
 import type {
   RecommendationPush,
-} from '../types/hamel';
+} from '../types/alertTypes';
 
 export const useHamelSocket = (): void => {
   const setActiveRecommendation = useSetAtom(activeRecommendationAtom);
