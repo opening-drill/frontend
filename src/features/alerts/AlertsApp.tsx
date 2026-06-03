@@ -95,7 +95,7 @@ export const AlertsApp: React.FC = () => {
           },
         }}
         open={isAircraftTableOpen} onClose={() => setIsAircraftTableOpen(false)}>
-        <AircraftTable />
+        <AircraftTable setIsAircraftTableOpen={setIsAircraftTableOpen}/>
       </Dialog>
     </Box>
   );
