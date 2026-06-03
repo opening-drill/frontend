@@ -6,7 +6,7 @@ import HubIcon from '@mui/icons-material/Hub';
 import AttackCardList from './components/open-alerts/OpenAlerts';
 import type { AlertData } from '../../types/hamel';
 import { approveAttackRequest } from '../../core/server/api/approveAttackRequest';
-import AircraftTable from './components/aircraft-table/AircraftTable';
+import { AircraftTable } from './components/aircraft-table/AircraftTable';
 import GenericMap from '../map/components/GenericMap';
 
 
@@ -156,6 +156,7 @@ export const AlertsApp: React.FC = () => {
                 onAccept={handleAccept}
                 onDecline={handleDecline}
                 onChooseAnother={handleChooseAnother}
+                setAlert={setSelectedAlert}
               />
             </Paper>
           </Grid>
@@ -178,7 +179,7 @@ export const AlertsApp: React.FC = () => {
           },
         }}
         open={isAircraftTableOpen} onClose={() => setIsAircraftTableOpen(false)}>
-        <AircraftTable setIsAircraftTableOpen={setIsAircraftTableOpen}/>
+        <AircraftTable setIsAircraftTableOpen={setIsAircraftTableOpen} handleAccept={handleAccept} alert={selectedAlert}/>
       </Dialog>
       <Dialog open={openConfirm} onClose={cancel}>
         <DialogTitle>Are you sure you want to attack?</DialogTitle>

@@ -1,7 +1,8 @@
-import { Box, Chip, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 // import type { genericCellParam, numericCellParam, statusCellParam } from "./AircraftTable.type";
 import FlightIcon from "@mui/icons-material/Flight";
 import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import type { aircraftType } from "./AircraftTable.type";
 
 
 // const statusConfig = {
@@ -35,14 +36,6 @@ const columns: GridColDef[] = [
     ),
   },
   {
-    field: "type",
-    headerName: "Type",
-    width: 190,
-    renderCell: (params: GridRenderCellParams) => (
-      <Typography sx={{ fontSize: "0.82rem", color: "#94a3b8" }}>{params.value}</Typography>
-    ),
-  },
-  {
     field: "price",
     headerName: "Price (USD)",
     width: 160,
@@ -56,36 +49,29 @@ const columns: GridColDef[] = [
     ),
   },
   {
-    field: "location",
-    headerName: "Location",
+    field: "payload",
+    headerName: "Payload (kg)",
     width: 190,
     renderCell: (params: GridRenderCellParams) => (
-      <Typography sx={{ fontSize: "0.82rem", color: "#cbd5e1" }}>{params.value}</Typography>
+      <Typography sx={{ fontSize: "0.82rem", color: "#94a3b8" }}>{params.value}</Typography>
     ),
   },
   {
-    field: "status",
-    headerName: "Status",
-    width: 140,
-    renderCell: (params: GridRenderCellParams) => {
-      // const cfg = statusConfig[params.value] || {};
-      return (
-        <Chip
-          label={params.value}
-          size="small"
-          variant="outlined"
-          sx={{
-            // ...cfg.style,
-            fontFamily: "'DM Mono', monospace",
-            fontSize: "0.7rem",
-            letterSpacing: "0.04em",
-            height: 24,
-            borderRadius: "6px",
-          }}
-        />
-      );
-    },
+    field: "velocity",
+    headerName: "Velocity (km/h)",
+      width: 190,
+    renderCell: (params: GridRenderCellParams) => (
+      <Typography sx={{ fontSize: "0.82rem", color: "#94a3b8" }}>{params.value}</Typography>
+    ),
   },
 ];
 
-export default { columns }
+const formatAircraftData = (aircraft: aircraftType[]) => aircraft.map((ac: aircraftType) => ({
+  id: ac.id,
+  type: ac.type.name,
+  price: ac.type.price,
+  payload: ac.type.payloadKg,
+  velocity: ac.type.velocityKmh,
+}))
+
+export default { columns, formatAircraftData };
