@@ -41,7 +41,7 @@ const useStyles = makeStyles()((theme) => ({
   }
 }));
 
-export const BaseOpsApp: React.FC = () => {
+export const AlertsApp: React.FC = () => {
   const { classes } = useStyles();
 
   return (
