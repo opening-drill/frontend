@@ -1,6 +1,10 @@
-import React from 'react';
-import { Box, Button, Typography, Paper, TextField } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Button, Typography, Paper, TextField, Alert, CircularProgress } from '@mui/material';
+import { useSetAtom } from 'jotai';
+import { useNavigate } from 'react-router-dom';
 import { makeStyles } from 'tss-react/mui';
+import { tokenAtom, userAtom } from '../../../core/store/authAtom';
+import { loginRequest } from '../../../core/server/api/appRequests';
 
 const useStyles = makeStyles()((theme) => ({
   container: {
@@ -43,6 +47,38 @@ const useStyles = makeStyles()((theme) => ({
 
 export const SignIn: React.FC = () => {
   const { classes } = useStyles();
+  const navigate = useNavigate();
+
+  const setToken = useSetAtom(tokenAtom);
+  const setUser = useSetAtom(userAtom);
+
+  const [username, setUsername] = useState('1234567@idf.il');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      const response = await loginRequest({ username, password });
+      
+      // Store token and user data in Jotai atoms
+      setToken(response.token);
+      setUser(response.user);
+      
+      // Navigate to operational screen
+      navigate('/');
+    } catch (err: any) {
+      console.error('Login error:', err);
+      const errMsg = err.response?.data?.message || err.message || 'Error logging in. Please try again.';
+      setError(errMsg);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Box className={`${classes.container} fade-in`}>
@@ -53,7 +89,14 @@ export const SignIn: React.FC = () => {
         <Typography variant="body1" className={classes.subtitle}>
           Sign in to access the command center
         </Typography>
-        <form className={classes.form} noValidate>
+
+        {error && (
+          <Alert severity="error" sx={{ width: '100%', mb: 2 }} variant="outlined">
+            {error}
+          </Alert>
+        )}
+
+        <form className={classes.form} onSubmit={handleSubmit} noValidate>
           <TextField
             variant="outlined"
             margin="normal"
@@ -64,6 +107,9 @@ export const SignIn: React.FC = () => {
             name="email"
             autoComplete="email"
             autoFocus
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            disabled={loading}
           />
           <TextField
             variant="outlined"
@@ -75,16 +121,23 @@ export const SignIn: React.FC = () => {
             type="password"
             id="password"
             autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
           />
           <Button
-            type="button"
+            type="submit"
             fullWidth
             variant="contained"
             color="primary"
             className={classes.submit}
-            onClick={() => window.location.href = '/'}
+            disabled={loading}
           >
-            Sign In
+            {loading ? (
+              <CircularProgress size={24} sx={{ color: 'inherit' }} />
+            ) : (
+              'Sign In'
+            )}
           </Button>
         </form>
       </Paper>

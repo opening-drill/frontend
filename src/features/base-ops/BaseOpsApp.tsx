@@ -1,8 +1,11 @@
 import React from 'react';
-import { Box, Typography, AppBar, Toolbar, Grid, Paper } from '@mui/material';
+import { Box, Typography, AppBar, Toolbar, Grid, Paper, Button } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 import { GenericMap } from '../map/components/GenericMap';
 import HubIcon from '@mui/icons-material/Hub';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { useSetAtom } from 'jotai';
+import { logoutAtom } from '../../core/store/authAtom';
 
 const useStyles = makeStyles()((theme) => ({
   root: {
@@ -43,15 +46,30 @@ const useStyles = makeStyles()((theme) => ({
 
 export const BaseOpsApp: React.FC = () => {
   const { classes } = useStyles();
+  const logout = useSetAtom(logoutAtom);
 
   return (
     <Box className={classes.root}>
       <AppBar position="static" className={classes.appBar} elevation={0}>
         <Toolbar>
           <HubIcon sx={{ mr: 2, color: 'secondary.main' }} />
-          <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 'bold' }}>
+          <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 'bold', flexGrow: 1 }}>
             Base of Operations
           </Typography>
+          <Button
+            color="inherit"
+            startIcon={<LogoutIcon />}
+            onClick={() => logout()}
+            sx={{
+              textTransform: 'none',
+              borderRadius: 2,
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+              }
+            }}
+          >
+            Logout
+          </Button>
         </Toolbar>
       </AppBar>
       <Box className={`${classes.content} fade-in`}>
