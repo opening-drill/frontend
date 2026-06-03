@@ -108,16 +108,16 @@
 }
 
 .acceptBtn {
-  background: #16a34a;
+  background: red;
   color: white;
 }
 
 .declineBtn {
-  background: #dc2626;
+  background: #334155;
   color: white;
 }
 
 .changeBtn {
-  background: #334155;
+  background: blue;
   color: white;
 }
