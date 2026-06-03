@@ -18,7 +18,7 @@ const useStyles = makeStyles()((theme) => ({
     top: 0,
     left: 0,
     overflow: 'hidden',
-    zIndex: -1,
+    zIndex: 0,
 
     '&::before': {
       content: '""',
@@ -91,6 +91,7 @@ const useStyles = makeStyles()((theme) => ({
     boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.03)',
     zIndex: 10,
     position: 'relative',
+    pointerEvents: 'auto',
   },
 
   telemetryText: {
