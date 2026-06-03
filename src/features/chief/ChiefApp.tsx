@@ -1,12 +1,7 @@
-import { Box, Typography, AppBar, Toolbar, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import { Box } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
-import { GenericMap } from '../map/components/GenericMap';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import SecurityIcon from '@mui/icons-material/Security';
-import MapIcon from '@mui/icons-material/Map';
+import GenericMap from '../map/components/GenericMap';
 import { CoordinatePill } from './components/CoordinatePill';
-
-const drawerWidth = 240;
 
 const useStyles = makeStyles()((theme) => ({
   root: {

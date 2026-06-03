@@ -1,7 +1,6 @@
 import { useAtomValue } from 'jotai';
 import React from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { BaseOpsApp } from '../features/base-ops/BaseOpsApp';
 import { ChiefApp } from '../features/chief/ChiefApp';
 import { LogIn } from '../features/common/pages/LogIn';
 import { Onboarding } from '../features/common/pages/Onboarding';
@@ -49,7 +48,7 @@ const RootRouter: React.FC = () => {
         path="/"
         element={
           <ProtectedRoute>
-            {role === '1' ? <ChiefApp /> : <BaseOpsApp />}
+            {role === '1' ? <ChiefApp /> : <ChiefApp />}
           </ProtectedRoute>
         }
       />
