@@ -1,27 +1,55 @@
+import { useAtomValue } from 'jotai';
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { SignIn } from '../features/common/pages/SignIn';
-import { Onboarding } from '../features/common/pages/Onboarding';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { ChiefApp } from '../features/chief/ChiefApp';
-import { BaseOpsApp } from '../features/base-ops/BaseOpsApp';
-import { useDeviceType } from './hooks/useDeviceType';
+import { LogIn } from '../features/common/pages/LogIn';
+import { Onboarding } from '../features/common/pages/Onboarding';
+import { isAuthenticatedAtom, userAtom } from './store/authAtom';
+
+// Guard for authenticated-only routes
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const isAuthenticated = useAtomValue(isAuthenticatedAtom);
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+};
+
+// Guard for unauthenticated-only routes (like Login)
+const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const isAuthenticated = useAtomValue(isAuthenticatedAtom);
+  return isAuthenticated ? <Navigate to="/" replace /> : <>{children}</>;
+};
 
 const RootRouter: React.FC = () => {
-  const deviceType = useDeviceType();
+  const user = useAtomValue(userAtom);
+  const role = user?.role;
 
   return (
     <Routes>
-      {/* Shared Routes */}
-      <Route path="/login" element={<SignIn />} />
-      <Route path="/onboarding" element={<Onboarding />} />
+      {/* Public/Unauthenticated routes */}
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <LogIn />
+          </PublicRoute>
+        }
+      />
 
-      {/* Device-specific Root Route */}
+      {/* Protected routes */}
+      <Route
+        path="/onboarding"
+        element={
+          <ProtectedRoute>
+            <Onboarding />
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="/"
         element={
-          deviceType === 'commander'
-            ? <ChiefApp />
-            : <BaseOpsApp />
+          <ProtectedRoute>
+            {role === '1' ? <ChiefApp /> : <ChiefApp />}
+          </ProtectedRoute>
         }
       />
 

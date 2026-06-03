@@ -6,8 +6,8 @@ import { CoordinatePill } from './components/CoordinatePill';
 import { ToastContainer, Slide } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { ChiefToastProvider, useChiefToast } from './context/ChiefToastContext';
-
-const useStyles = makeStyles()(() => ({
+  
+const useStyles = makeStyles()((theme) => ({
   root: {
     display: 'flex',
     height: '100vh',
