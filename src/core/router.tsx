@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { SignIn } from '../features/common/pages/SignIn';
 import { Onboarding } from '../features/common/pages/Onboarding';
 import { CommanderApp } from '../features/commander/CommanderApp';
-import { AlertsApp } from '../features/base-ops/AlertsApp';
+import { AlertsApp } from '../features/alerts/AlertsApp';
 import { useDeviceType } from './hooks/useDeviceType';
 
 const RootRouter: React.FC = () => {
