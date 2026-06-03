@@ -1,6 +1,10 @@
-import React from 'react';
-import { Box, Button, Typography, Paper, TextField } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Button, Typography, Paper, TextField, Alert, CircularProgress } from '@mui/material';
+import { useSetAtom } from 'jotai';
+import { useNavigate } from 'react-router-dom';
 import { makeStyles } from 'tss-react/mui';
+import { tokenAtom, userAtom } from '../../../core/store/authAtom';
+import { loginRequest } from '../../../core/server/api/appRequests';
 
 const useStyles = makeStyles()((theme) => ({
   container: {
@@ -41,20 +45,57 @@ const useStyles = makeStyles()((theme) => ({
   }
 }));
 
+type LoginError = {
+  response?: { data?: { message?: string } };
+  message?: string;
+};
+
+const extractErrorMessage = (err: unknown): string => {
+  const error = typeof err === 'object' && err !== null ? (err as LoginError) : undefined;
+
+  if (typeof error?.response?.data?.message === 'string') {
+    return error.response.data.message;
+  }
+
+  if (typeof error?.message === 'string') {
+    return error.message;
+  }
+
+  return 'שגיאה בהתחברות. נסה שוב.';
+};
+
 export const LogIn: React.FC = () => {
   const { classes } = useStyles();
-  const [username, setUsername] = React.useState('');
-  const [password, setPassword] = React.useState('');
+  const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const setToken = useSetAtom(tokenAtom);
+  const setUser = useSetAtom(userAtom);
+
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError(null);
+    setLoading(true);
 
-    // Dummy function showing the username and password in console & alert
-    console.log('Dummy Auth Success:', { username, password });
-    alert(`נשלח לפונקציית התחברות:\nמשתמש: ${username}\nסיסמה: ${password}`);
-
-    // Proceed to redirect
-    window.location.href = '/';
+    try {
+      const response = await loginRequest({ username, password });
+      
+      // Store token and user data in Jotai atoms
+      setToken(response.token);
+      setUser(response.user);
+      
+      // Navigate to operational screen
+      navigate('/');
+    } catch (err: unknown) {
+      console.error('Login error:', err);
+      setError(extractErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -66,7 +107,13 @@ export const LogIn: React.FC = () => {
         <Typography variant="body1" className={classes.subtitle}>
           התחבר למרכז הבקרה
         </Typography>
-        <form className={classes.form} onSubmit={handleLogin} noValidate>
+        {error && (
+          <Alert severity="error" sx={{ width: '100%', mb: 2 }} variant="outlined">
+            {error}
+          </Alert>
+        )}
+
+        <form className={classes.form} onSubmit={handleSubmit} noValidate>
           <TextField
             variant="outlined"
             margin="normal"
@@ -80,6 +127,7 @@ export const LogIn: React.FC = () => {
             slotProps={{ htmlInput: { maxLength: 25 } }}
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+            disabled={loading}
           />
           <TextField
             variant="outlined"
@@ -94,6 +142,7 @@ export const LogIn: React.FC = () => {
             slotProps={{ htmlInput: { maxLength: 25 } }}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
           />
           <Button
             type="submit"
@@ -101,8 +150,13 @@ export const LogIn: React.FC = () => {
             variant="contained"
             color="primary"
             className={classes.submit}
+            disabled={loading}
           >
-            התחבר
+            {loading ? (
+              <CircularProgress size={24} sx={{ color: 'inherit' }} />
+            ) : (
+              'התחבר'
+            )}
           </Button>
         </form>
       </Paper>

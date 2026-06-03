@@ -1,9 +1,13 @@
-import { Box, Typography, AppBar, Toolbar, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import React from 'react';
+import { Box, Typography, AppBar, Toolbar, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Button } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 import { GenericMap } from '../map/components/GenericMap';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import SecurityIcon from '@mui/icons-material/Security';
 import MapIcon from '@mui/icons-material/Map';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { useSetAtom } from 'jotai';
+import { logoutAtom } from '../../core/store/authAtom';
 
 const drawerWidth = 240;
 
@@ -42,6 +46,7 @@ const useStyles = makeStyles()((theme) => ({
 
 export const CommanderApp: React.FC = () => {
   const { classes } = useStyles();
+  const logout = useSetAtom(logoutAtom);
 
   return (
     <Box className={classes.root}>
@@ -51,6 +56,20 @@ export const CommanderApp: React.FC = () => {
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
             Commander Control Center
           </Typography>
+          <Button
+            color="inherit"
+            startIcon={<LogoutIcon />}
+            onClick={() => logout()}
+            sx={{
+              textTransform: 'none',
+              borderRadius: 2,
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+              }
+            }}
+          >
+            Logout
+          </Button>
         </Toolbar>
       </AppBar>
       <Drawer
