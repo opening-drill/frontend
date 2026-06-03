@@ -69,8 +69,8 @@ export const AlertsApp: React.FC = () => {
               <Typography variant="body2" color="textSecondary">
                 All systems nominal. Awaiting further tactical data.
               </Typography>
-              <Button sx={{width: 'fit-content'}} onClick={() => setIsAircraftTableOpen(true)}>
-                 open aircrafts table
+              <Button sx={{ width: 'fit-content' }} onClick={() => setIsAircraftTableOpen(true)}>
+                open aircrafts table
               </Button>
             </Paper>
           </Grid>
@@ -83,8 +83,19 @@ export const AlertsApp: React.FC = () => {
           </Grid>
         </Grid>
       </Box>
-      <Dialog open={isAircraftTableOpen} onClose={() => setIsAircraftTableOpen(false)}>
-        <AircraftTable/>
+      <Dialog maxWidth={false}
+        slotProps={{
+          paper: {
+            sx: {
+              width: '95vw',
+              height: '90vh',
+              maxWidth: 'none',
+              maxHeight: 'none',
+            },
+          },
+        }}
+        open={isAircraftTableOpen} onClose={() => setIsAircraftTableOpen(false)}>
+        <AircraftTable />
       </Dialog>
     </Box>
   );
