@@ -6,6 +6,7 @@ import {
 } from "@mui/material";
 import FlightIcon from "@mui/icons-material/Flight";
 import config from './AircraftTable.config';
+import { getAirCraftStatus } from "../../../../core/server/api/getAircraftStatus";
 
 const rows = [
   { id: "AC-001", name: "Boeing 737 MAX", type: "Commercial Airliner", price: 121_900_000, location: "Chicago O'Hare", status: "Available" },
@@ -25,7 +26,8 @@ const rows = [
   { id: "AC-015", name: "Boeing 787-9", type: "Wide-body Airliner", price: 292_500_000, location: "Tokyo Haneda", status: "Reserved" },
 ];
 
-export default function AircraftTable() {
+export const  AircraftTable: React.FC = async () => {
+  const aircraft = getAirCraftStatus().data;
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
   const [selectedAircraft, setSelectedAircraft] = useState(null);
 
