@@ -1,10 +1,10 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAtomValue } from 'jotai';
+import React from 'react';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BaseOpsApp } from '../features/base-ops/BaseOpsApp';
+import { ChiefApp } from '../features/chief/ChiefApp';
 import { LogIn } from '../features/common/pages/LogIn';
 import { Onboarding } from '../features/common/pages/Onboarding';
-import { CommanderApp } from '../features/commander/CommanderApp';
-import { BaseOpsApp } from '../features/base-ops/BaseOpsApp';
 import { isAuthenticatedAtom, userAtom } from './store/authAtom';
 
 // Guard for authenticated-only routes
@@ -49,7 +49,7 @@ const RootRouter: React.FC = () => {
         path="/"
         element={
           <ProtectedRoute>
-            {role === '1' ? <CommanderApp /> : <BaseOpsApp />}
+            {role === '1' ? <ChiefApp /> : <BaseOpsApp />}
           </ProtectedRoute>
         }
       />
