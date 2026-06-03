@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import {
   Box,
+  Button,
   Typography,
 } from "@mui/material";
 import FlightIcon from "@mui/icons-material/Flight";
@@ -28,7 +29,7 @@ const rows = [
   { id: "AC-015", name: "Boeing 787-9", type: "Wide-body Airliner", price: 292_500_000, location: "Tokyo Haneda", status: "Reserved" },
 ];
 
-export const  AircraftTable: React.FC = () => {
+export const  AircraftTable = (props: { setIsAircraftTableOpen: React.Dispatch<React.SetStateAction<boolean>>}) => {
   const [aircraft, setAircraft] = useState<aircraftType[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -132,6 +133,12 @@ export const  AircraftTable: React.FC = () => {
         // setSelectedAircraft(aircraft);
       }}
           />
+          <Button sx={{ width: 'fit-content', color: selectedAircraft !== null ? 'blue' : 'grey' }} onClick={() => props.setIsAircraftTableOpen(false)} disabled={selectedAircraft === null}>
+          launch
+        </Button>
+        <Button sx={{ width: 'fit-content' }} onClick={() => props.setIsAircraftTableOpen(false)}>
+          cancel
+        </Button>
           </Loader>
         </Box>
       </Box>
