@@ -1,11 +1,14 @@
-import React from 'react';
-import { Box, Typography, AppBar, Toolbar, Grid, Paper } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Typography, AppBar, Toolbar, Grid, Paper, Dialog } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 import { GenericMap } from '../map/components/GenericMap';
 import HubIcon from '@mui/icons-material/Hub';
+
 import AttackCardList from './components/open-alerts/OpenAlerts';
 import type { AlertData } from '../../types/hamel';
 import { approveAttackRequest } from '../../core/server/api/approveAttackRequest';
+import AircraftTable from './components/aircraft-table/AircraftTable';
+
 
 const useStyles = makeStyles()((theme) => ({
   root: {
@@ -44,6 +47,7 @@ const useStyles = makeStyles()((theme) => ({
 
 export const AlertsApp: React.FC = () => {
   const { classes } = useStyles();
+
   const alerts: AlertData[] = [
   {
     event_id: "evt-001",
@@ -111,14 +115,12 @@ export const AlertsApp: React.FC = () => {
     alerts.splice(alerts.findIndex(a => a.event_id === alert.event_id), 1);
   };
 
-  const handleChooseAnother = (alert: AlertData) => {
-    console.log(
-      "CHANGE AIRCRAFT",
-      alert.event_id,
-      alert.recommended_aircraft_id
-    );
+  const handleChooseAnother = () => {
+    setIsAircraftTableOpen(true)
   };
 
+  const [isAircraftTableOpen, setIsAircraftTableOpen] = useState(false)
+  
   return (
     <Box className={classes.root}>
       <AppBar position="static" className={classes.appBar} elevation={0}>
@@ -149,6 +151,20 @@ export const AlertsApp: React.FC = () => {
           </Grid>
         </Grid>
       </Box>
+      <Dialog maxWidth={false}
+        slotProps={{
+          paper: {
+            sx: {
+              width: '95vw',
+              height: '90vh',
+              maxWidth: 'none',
+              maxHeight: 'none',
+            },
+          },
+        }}
+        open={isAircraftTableOpen} onClose={() => setIsAircraftTableOpen(false)}>
+        <AircraftTable setIsAircraftTableOpen={setIsAircraftTableOpen}/>
+      </Dialog>
     </Box>
   );
 };
