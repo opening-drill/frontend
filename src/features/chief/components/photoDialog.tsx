@@ -1,14 +1,16 @@
 import React from 'react';
-import { Dialog, Box, Button } from '@mui/material';
+import { Dialog, Box, Button, Typography } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
+import ReplayOutlinedIcon from '@mui/icons-material/ReplayOutlined';
+import CheckOutlinedIcon from '@mui/icons-material/CheckOutlined';
 
-const useStyles = makeStyles()(() => ({
+const useStyles = makeStyles()((theme) => ({
     dialogPaper: {
         backgroundColor: '#000000',
         color: '#ffffff',
         margin: 0,
         width: '100vw',
-        height: '100vh',
+        height: '100dvh',
         maxWidth: 'none !important',
         maxHeight: 'none !important',
         borderRadius: 0,
@@ -20,30 +22,62 @@ const useStyles = makeStyles()(() => ({
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
-        backgroundColor: '#000',
         width: '100%',
+        backgroundColor: '#ffffffff',
         justifyContent: 'center',
         alignItems: 'center',
     },
     acceptButton: {
-        borderRadius: "13px",
-        backgroundColor: "#2B7C4E",
+        borderRadius: "8px",
+        backgroundColor: '#2C2C2C',
         color: "#ffffff",
-        width: "35%",
+        width: "30%",
+        fontFamily: '"Heebo", sans-serif',
+        fontWeight: 600,
+        gap: '3px',
+        [theme.breakpoints.down('sm')]: {
+            width: "45%",
+            padding: "10px 5px",
+        }
     },
     reCaptureButton: {
-        borderRadius: "13px",
+        borderRadius: "8px",
+        border: "3px solid #2C2C2C",
         backgroundColor: "#ffffff",
-        color: "#000000",
-        width: "35%",
+        color: "#2C2C2C",
+        width: "30%",
+        fontFamily: '"Heebo", sans-serif',
+        fontWeight: 600,
+        gap: '3px',
+        [theme.breakpoints.down('sm')]: {
+            width: "45%",
+            padding: "10px 5px",
+        }
     },
     capturedImage: {
-        width: '100%',
-        height: 'calc(100% - 100px)',
+        maxWidth: 'calc(100% - 32px)',
+        maxHeight: 'calc(100% - 132px)',
+        width: 'auto',
+        height: 'auto',
+        margin: '16px',
         objectFit: 'contain',
+        borderRadius: '16px',
     },
     buttonsContainer: {
-
+        display: 'flex',
+        justifyContent: 'space-around',
+        width: '100%',
+        padding: '20px',
+        [theme.breakpoints.down('sm')]: {
+            padding: '10px',
+        }
+    },
+    subTitle: {
+        color: '#646363',
+        direction: 'rtl',
+        fontFamily: '"Heebo", sans-serif',
+        fontSize: '16px',
+        fontWeight: 600,
     }
 }));
 
@@ -84,12 +118,17 @@ export const PhotoDialog: React.FC<PhotoDialogProps> = ({
             {capturedImage && (
                 <Box className={classes.cameraContainer}>
                     <img src={capturedImage} alt="Preview" className={classes.capturedImage} />
-                    <Box sx={{ display: 'flex', justifyContent: 'space-around', width: '100%', padding: '20px', backgroundColor: '#000' }}>
-                        <Button className={classes.reCaptureButton} onClick={onRecapture} sx={{ width: '40%' }}>
-                            צילום חוזר
+                    <Typography className={classes.subTitle}>
+                        האם המטרה נראת בבירור ?
+                    </Typography>
+                    <Box className={classes.buttonsContainer}>
+                        <Button className={classes.reCaptureButton} onClick={onRecapture}>
+                            צלם מחדש
+                            <ReplayOutlinedIcon />
                         </Button>
-                        <Button className={classes.acceptButton} onClick={handleAccept} sx={{ width: '40%' }}>
+                        <Button className={classes.acceptButton} onClick={handleAccept}>
                             אשר מטרה
+                            <CheckOutlinedIcon />
                         </Button>
                     </Box>
                 </Box>

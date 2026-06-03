@@ -1,12 +1,13 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Fab, Dialog, IconButton, Box, Typography } from '@mui/material';
+import { Fab, Dialog, IconButton, Box, Typography, Button } from '@mui/material';
 import TargetIcon from '../assets/TargetIcon.svg';
 import CloseIcon from '@mui/icons-material/Close';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import { makeStyles } from 'tss-react/mui';
+import PhotoCameraOutlinedIcon from '@mui/icons-material/PhotoCameraOutlined';
 import { PhotoDialog } from './photoDialog';
 
-const useStyles = makeStyles()(() => ({
+const useStyles = makeStyles()((theme) => ({
     fab: {
         backgroundColor: '#000000',
         color: '#ffffff',
@@ -24,17 +25,35 @@ const useStyles = makeStyles()(() => ({
         '&:active': {
             transform: 'scale(0.92)',
         },
+        [theme.breakpoints.down('sm')]: {
+            width: '60px',
+            height: '60px',
+            minHeight: '60px',
+        }
     },
     icon: {
         width: '44px',
         height: '44px',
+        [theme.breakpoints.down('sm')]: {
+            width: '32px',
+            height: '32px',
+        }
+    },
+    cameraButton: {
+        gap: '5px',
+        borderRadius: '30px',
+        color: '#FFFFFF',
+        fontFamily: '"Heebo", sans-serif',
+        fontSize: '18px',
+        fontWeight: 600,
+        backgroundColor: '#2C2C2C'
     },
     dialogPaper: {
         backgroundColor: '#000000',
         color: '#ffffff',
         margin: 0,
         width: '100vw',
-        height: '100vh',
+        height: '100dvh',
         maxWidth: 'none !important',
         maxHeight: 'none !important',
         borderRadius: 0,
@@ -53,15 +72,21 @@ const useStyles = makeStyles()(() => ({
         objectFit: 'cover',
     },
     controlsContainer: {
+        backgroundColor: 'black',
         position: 'absolute',
-        bottom: 55,
+        bottom: 0,
         left: 0,
         right: 0,
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '0 40px',
+        padding: '20px 50px',
+        paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
         zIndex: 10,
+        [theme.breakpoints.down('sm')]: {
+            padding: '15px 20px',
+            paddingBottom: 'calc(15px + env(safe-area-inset-bottom, 0px))',
+        }
     },
     galleryButton: {
         color: '#ffffff',
@@ -75,10 +100,18 @@ const useStyles = makeStyles()(() => ({
         justifyContent: 'center',
         alignItems: 'center',
         cursor: 'pointer',
+        [theme.breakpoints.down('sm')]: {
+            width: '45px',
+            height: '45px',
+        }
     },
     placeholder: {
         width: '50px',
         height: '50px',
+        [theme.breakpoints.down('sm')]: {
+            width: '45px',
+            height: '45px',
+        }
     },
     closeButton: {
         position: 'absolute',
@@ -90,12 +123,40 @@ const useStyles = makeStyles()(() => ({
             backgroundColor: 'rgba(0, 0, 0, 0.6)',
         },
         zIndex: 10,
+        [theme.breakpoints.down('sm')]: {
+            top: 10,
+            right: 10,
+        }
     },
     errorText: {
-        color: '#ff1744',
+        color: 'white',
+        backgroundColor: '#ff1744',
+        borderRadius: '15px',
         textAlign: 'center',
+        fontFamily: '"Heebo", sans-serif',
         padding: 16,
+        fontWeight: 600,
     },
+    cameraFunctions: {
+        backgroundColor: 'red'
+    },
+    shutterButton: {
+        width: '64px',
+        height: '64px',
+        borderRadius: '50%',
+        backgroundColor: '#ffffff',
+        border: '3px solid #000000',
+        boxShadow: '0 0 0 4px #ffffff',
+        cursor: 'pointer',
+        transition: 'transform 0.1s ease',
+        '&:active': {
+            transform: 'scale(0.92)',
+        },
+        [theme.breakpoints.down('sm')]: {
+            width: '56px',
+            height: '56px',
+        }
+    }
 }));
 
 interface OpenCameraButtonProps {
@@ -105,7 +166,6 @@ interface OpenCameraButtonProps {
 
 export const OpenCameraButton: React.FC<OpenCameraButtonProps> = ({
     onCapture,
-    size = 'large',
 }) => {
     const { classes } = useStyles();
     const [isOpen, setIsOpen] = useState(false);
@@ -200,6 +260,13 @@ export const OpenCameraButton: React.FC<OpenCameraButtonProps> = ({
         const files = event.target.files;
         if (files && files.length > 0) {
             const file = files[0];
+
+            if (!file.type.startsWith('image/')) {
+                alert('נא לבחור קובץ תמונה בלבד');
+                event.target.value = '';
+                return;
+            }
+
             const previewUrl = URL.createObjectURL(file);
 
             setCapturedFile(file);
@@ -216,7 +283,7 @@ export const OpenCameraButton: React.FC<OpenCameraButtonProps> = ({
         if (onCapture) {
             onCapture(file, previewUrl);
         }
-        alert('Photo accepted!');
+        alert('עלתה התמונה');
         setIsOpen(false);
         setCapturedImage(null);
         setCapturedFile(null);
@@ -224,14 +291,14 @@ export const OpenCameraButton: React.FC<OpenCameraButtonProps> = ({
 
     return (
         <>
-            <Fab
-                className={classes.fab}
-                size={size}
+            <Button
+                className={classes.cameraButton}
                 onClick={() => setIsOpen(true)}
                 aria-label="open camera"
             >
-                <img src={TargetIcon} className={classes.icon} alt="Target" />
-            </Fab>
+                לצילום מטרה
+                <PhotoCameraOutlinedIcon />
+            </Button>
 
             {/* Hidden canvas for taking snapshot */}
             <canvas ref={canvasRef} style={{ display: 'none' }} />
@@ -272,7 +339,6 @@ export const OpenCameraButton: React.FC<OpenCameraButtonProps> = ({
 
                     <input
                         type="file"
-                        accept=".png, .jpg, .jpeg, .webp"
                         ref={galleryInputRef}
                         onChange={handleGalleryChange}
                         style={{ display: 'none' }}
@@ -282,10 +348,7 @@ export const OpenCameraButton: React.FC<OpenCameraButtonProps> = ({
                     <Box className={classes.controlsContainer}>
                         <Box className={classes.placeholder} />
 
-                        <Box className={classes.fab} onClick={handleCapture}>
-                            <img src={TargetIcon} className={classes.icon} alt="Capture" />
-                        </Box>
-
+                        <Box className={classes.shutterButton} onClick={handleCapture} />
                         <IconButton
                             className={classes.galleryButton}
                             onClick={handleGalleryClick}
