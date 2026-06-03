@@ -5,8 +5,7 @@ import { LogIn } from '../features/common/pages/LogIn';
 import { Onboarding } from '../features/common/pages/Onboarding';
 import { CommanderApp } from '../features/commander/CommanderApp';
 import { BaseOpsApp } from '../features/base-ops/BaseOpsApp';
-import { useDeviceType } from './hooks/useDeviceType';
-import { isAuthenticatedAtom } from './store/authAtom';
+import { isAuthenticatedAtom, userAtom } from './store/authAtom';
 
 // Guard for authenticated-only routes
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -21,7 +20,8 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 const RootRouter: React.FC = () => {
-  const deviceType = useDeviceType();
+  const user = useAtomValue(userAtom);
+  const role = user?.role;
 
   return (
     <Routes>
@@ -49,7 +49,7 @@ const RootRouter: React.FC = () => {
         path="/"
         element={
           <ProtectedRoute>
-            {deviceType === 'commander' ? <CommanderApp /> : <BaseOpsApp />}
+            {role === '1' ? <CommanderApp /> : <BaseOpsApp />}
           </ProtectedRoute>
         }
       />
