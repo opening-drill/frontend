@@ -14,10 +14,6 @@ interface MapContextProps {
 
 const MapContext = createContext<MapContextProps | null>(null);
 
-const degreesToRadians = (degrees: number) => {
-  return degrees * (Math.PI / 180);
-};
-
 export const MapProvider = ({ children }: { children: ReactNode }) => {
   const mapRef = useRef<Map | null>(null);
 
@@ -27,7 +23,7 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
     heading?: number
   ) => {
     if (mapRef.current) {
-      const rotationInRadians = degreesToRadians(heading);
+      const rotationInRadians = heading ? heading * (Math.PI / 180) : 0;
 
       mapRef.current.getView().animate({
         center: fromLonLat(coords),
