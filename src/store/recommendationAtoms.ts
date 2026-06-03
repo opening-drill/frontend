@@ -1,7 +1,7 @@
 import { atom } from 'jotai';
 import type {
-  RecommendationPush,
-} from '../types/alertTypes';
+  AlertData,
+} from '../types/hamel';
 
-export const activeRecommendationAtom = atom<RecommendationPush[] >([]);
+export const activeRecommendationAtom = atom<AlertData[] >([]);
 
