@@ -112,7 +112,7 @@ export const BaseOpsApp: React.FC = () => {
       >
         <Paper className={classes.paper} elevation={0}>
           <Box className={classes.mapContainer}>
-            <GenericMap />
+            <GenericMap enableDrawing enableAttackMode />
           </Box>
         </Paper>
       </Box>
