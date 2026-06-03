@@ -1,16 +1,20 @@
-import { Box, Typography, AppBar, Toolbar, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import { Box } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 import { GenericMap } from '../map/components/GenericMap';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import SecurityIcon from '@mui/icons-material/Security';
-import MapIcon from '@mui/icons-material/Map';
+import { OpenCameraButton } from './components/openCameraButton';
 
-const drawerWidth = 240;
-
-const useStyles = makeStyles()((theme) => ({
+const useStyles = makeStyles()(() => ({
   root: {
     display: 'flex',
     height: '100vh',
+    position: 'relative',
+  },
+  cameraButtonContainer: {
+    position: 'absolute',
+    bottom: 55,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    zIndex: 1000,
   },
 }));
 
@@ -20,6 +24,11 @@ export const ChiefApp: React.FC = () => {
   return (
     <Box className={classes.root}>
       <GenericMap />
+
+      <Box className={classes.cameraButtonContainer}>
+        <OpenCameraButton />
+      </Box>
     </Box>
   );
 };
+
