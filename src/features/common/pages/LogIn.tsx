@@ -43,9 +43,22 @@ const useStyles = makeStyles()((theme) => ({
 
 export const LogIn: React.FC = () => {
   const { classes } = useStyles();
+  const [username, setUsername] = React.useState('');
+  const [password, setPassword] = React.useState('');
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Dummy function showing the username and password in console & alert
+    console.log('Dummy Auth Success:', { username, password });
+    alert(`נשלח לפונקציית התחברות:\nמשתמש: ${username}\nסיסמה: ${password}`);
+
+    // Proceed to redirect
+    window.location.href = '/';
+  };
 
   return (
-    <Box className={`${classes.container} fade-in`}>
+    <Box className={`${classes.container} fade-in`} dir="rtl">
       <Paper elevation={0} className={classes.paper}>
         <Typography component="h1" variant="h4" className={classes.title}>
           ברוכים הבאים
@@ -53,7 +66,7 @@ export const LogIn: React.FC = () => {
         <Typography variant="body1" className={classes.subtitle}>
           התחבר למרכז הבקרה
         </Typography>
-        <form className={classes.form} noValidate>
+        <form className={classes.form} onSubmit={handleLogin} noValidate>
           <TextField
             variant="outlined"
             margin="normal"
@@ -64,6 +77,9 @@ export const LogIn: React.FC = () => {
             name="username"
             autoComplete="username"
             autoFocus
+            slotProps={{ htmlInput: { maxLength: 25 } }}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
           <TextField
             variant="outlined"
@@ -75,14 +91,16 @@ export const LogIn: React.FC = () => {
             type="password"
             id="password"
             autoComplete="current-password"
+            slotProps={{ htmlInput: { maxLength: 25 } }}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
           <Button
-            type="button"
+            type="submit"
             fullWidth
             variant="contained"
             color="primary"
             className={classes.submit}
-            onClick={() => window.location.href = '/'}
           >
             התחבר
           </Button>
