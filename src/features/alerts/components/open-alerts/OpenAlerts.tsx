@@ -20,7 +20,7 @@ export default function AttackCardList({
 }: Props) {
   const [openId, setOpenId] = useState<string | null>(null);
 
-  const handleToggle = (id: string) => {
+  const handleToggle = (id: string | null) => {
     setOpenId((prev) => (prev === id ? null : id));
   };
 
@@ -29,7 +29,7 @@ export default function AttackCardList({
         {alerts.map((alert) => (
           <div
             key={alert.event_id}
-            onClick={() => handleToggle(alert.event_id)}>
+            onClick={() => handleToggle(alert.event_id ?? null)}>
             <AttackCard
               alert={alert}
               open={openId === alert.event_id}

@@ -30,7 +30,7 @@ const rows = [
   { id: "AC-015", name: "Boeing 787-9", price: 292_500_000, location: "Tokyo Haneda", status: "Reserved", payload: 43_800, velocity: 903 },
 ];
 
-export const  AircraftTable = (props: { setIsAircraftTableOpen: React.Dispatch<React.SetStateAction<boolean>>, handleAccept: (alert: AlertData) => void, alert: AlertData | null }) => {
+export const  AircraftTable = ({setIsAircraftTableOpen, handleAccept, alert} :{ setIsAircraftTableOpen: React.Dispatch<React.SetStateAction<boolean>>, handleAccept: (alert: AlertData) => void, alert: AlertData | null }) => {
   const [aircraft, setAircraft] = useState<aircraftType[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -54,8 +54,8 @@ export const  AircraftTable = (props: { setIsAircraftTableOpen: React.Dispatch<R
   const [selectedAircraft, setSelectedAircraft] = useState<aircraftRowType | null>(null);
 
   const handleLaunch = (alert: AlertData) => {
-    props.setIsAircraftTableOpen(false);
-    props.handleAccept(alert);
+    setIsAircraftTableOpen(false);
+    handleAccept(alert);
   }
 
   return (
@@ -130,10 +130,10 @@ export const  AircraftTable = (props: { setIsAircraftTableOpen: React.Dispatch<R
                 setSelectedAircraft(newSelection.row)
       }}
           />
-          <Button sx={{ width: 'fit-content', color: selectedAircraft !== null ? 'blue' : 'grey' }} onClick={() => handleLaunch({ ...props.alert!, aircraft_type: selectedAircraft!.name })} disabled={!selectedAircraft || !props.alert}>
+          <Button sx={{ width: 'fit-content', color: selectedAircraft !== null ? 'blue' : 'grey' }} onClick={() => handleLaunch({ ...alert!, aircraft_type: selectedAircraft!.name })} disabled={!selectedAircraft || !alert}>
           launch
         </Button>
-        <Button sx={{ width: 'fit-content' }} onClick={() => props.setIsAircraftTableOpen(false)}>
+        <Button sx={{ width: 'fit-content' }} onClick={() => setIsAircraftTableOpen(false)}>
           cancel
         </Button>
           </Loader>

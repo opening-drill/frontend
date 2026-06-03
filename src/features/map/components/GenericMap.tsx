@@ -25,6 +25,7 @@ import Feature from "ol/Feature";
 import PointGeometry from "ol/geom/Point";
 import { useMap } from "../MapProvider";
 import { LOCATIONS } from "../utils/mapUtils";
+import type { AlertData } from "../../../types/hamel";
 
 const useStyles = makeStyles()((theme) => ({
   mapContainer: {
@@ -273,7 +274,13 @@ const getFeatureStyle = (color: string, isAttack = false) => {
   });
 };
 
-const GenericMap = () => {
+const GenericMap = ({
+  setIsAircraftTableOpen,
+  setAlert,
+}: {
+  setIsAircraftTableOpen: (isOpen: boolean) => void,
+  setAlert: (alert: AlertData | null) => void;
+}) => {
   const { classes } = useStyles();
   const { mapRef } = useMap();
   const mapElement = useRef<HTMLDivElement>(null);
@@ -469,6 +476,10 @@ const GenericMap = () => {
   };
 
   const handleAttackConfirm = () => {
+    if (attackCoords) {
+      setAlert({target: { latitude: Number(attackCoords?.lat), longitude: Number(attackCoords?.lon) }})
+      setIsAircraftTableOpen(true);
+    }
     if (attackCoords) {
       alert(`מבצע תקיפה לקואורדינטות: ${attackCoords.lat}, ${attackCoords.lon}`);
     }
