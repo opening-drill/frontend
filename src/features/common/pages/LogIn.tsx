@@ -45,23 +45,20 @@ const useStyles = makeStyles()((theme) => ({
   }
 }));
 
+type LoginError = {
+  response?: { data?: { message?: string } };
+  message?: string;
+};
+
 const extractErrorMessage = (err: unknown): string => {
-  if (
-    typeof err === 'object' &&
-    err !== null &&
-    'response' in err &&
-    typeof (err as { response?: { data?: { message?: string } } }).response?.data?.message === 'string'
-  ) {
-    return (err as { response?: { data?: { message?: string } } }).response?.data?.message as string;
+  const error = typeof err === 'object' && err !== null ? (err as LoginError) : undefined;
+
+  if (typeof error?.response?.data?.message === 'string') {
+    return error.response.data.message;
   }
 
-  if (
-    typeof err === 'object' &&
-    err !== null &&
-    'message' in err &&
-    typeof (err as { message?: string }).message === 'string'
-  ) {
-    return (err as { message?: string }).message as string;
+  if (typeof error?.message === 'string') {
+    return error.message;
   }
 
   return 'שגיאה בהתחברות. נסה שוב.';
