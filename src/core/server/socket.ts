@@ -1,7 +1,7 @@
 import { io, type Socket } from 'socket.io-client';
 import type {
   RecommendationPush,
-} from '../../types/hamel';
+} from '../../types/alertTypes';
 
 const TOKEN_STORAGE_KEY = 'token';
 const LIVE_NAMESPACE = '/live';
