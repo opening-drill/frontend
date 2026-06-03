@@ -74,7 +74,7 @@ export const LogIn: React.FC = () => {
   const setToken = useSetAtom(tokenAtom);
   const setUser = useSetAtom(userAtom);
 
-  const [username, setUsername] = useState('1234567@idf.il');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
