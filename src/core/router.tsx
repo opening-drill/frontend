@@ -49,7 +49,7 @@ const RootRouter: React.FC = () => {
         path="/"
         element={
           <ProtectedRoute>
-            {role === '1' ? <ChiefApp /> : <BaseOpsApp />}
+            {role === '2' ? <ChiefApp /> : <BaseOpsApp />}
           </ProtectedRoute>
         }
       />

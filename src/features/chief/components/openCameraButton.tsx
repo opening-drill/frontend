@@ -46,7 +46,8 @@ const useStyles = makeStyles()((theme) => ({
         fontFamily: '"Heebo", sans-serif',
         fontSize: '18px',
         fontWeight: 600,
-        backgroundColor: '#2C2C2C'
+        backgroundColor: '#2C2C2C',
+        direction: 'rtl',
     },
     dialogPaper: {
         backgroundColor: '#000000',
@@ -60,6 +61,7 @@ const useStyles = makeStyles()((theme) => ({
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
+        direction: 'rtl',
     },
     cameraContainer: {
         display: 'flex',
@@ -80,19 +82,16 @@ const useStyles = makeStyles()((theme) => ({
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '20px 50px',
-        paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
+        padding: '30px 40px',
+        paddingBottom: 'calc(30px + env(safe-area-inset-bottom, 0px))',
         zIndex: 10,
         [theme.breakpoints.down('sm')]: {
-            padding: '15px 20px',
-            paddingBottom: 'calc(15px + env(safe-area-inset-bottom, 0px))',
+            padding: '25px',
+            paddingBottom: 'calc(40px + env(safe-area-inset-bottom, 0px))',
         }
     },
     galleryButton: {
         color: '#ffffff',
-        backgroundColor: 'rgba(255, 255, 255, 0.15)',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(255, 255, 255, 0.3)',
         width: '50px',
         height: '50px',
         borderRadius: '50%',
