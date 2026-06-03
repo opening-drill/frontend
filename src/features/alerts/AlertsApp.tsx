@@ -3,7 +3,7 @@ import { Box, Typography, AppBar, Toolbar, Grid, Paper, Button, Dialog } from '@
 import { makeStyles } from 'tss-react/mui';
 import { GenericMap } from '../map/components/GenericMap';
 import HubIcon from '@mui/icons-material/Hub';
-import AircraftTable from './components/aircraft-table/AircraftTable';
+import { AircraftTable } from './components/aircraft-table/AircraftTable';
 
 const useStyles = makeStyles()((theme) => ({
   root: {
