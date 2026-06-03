@@ -1,13 +1,13 @@
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
-import { Box, Typography, IconButton } from '@mui/material';
+import { Box, Typography, IconButton, Badge } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import React from 'react';
 import { makeStyles } from 'tss-react/mui';
 import { useDeviceLocation } from '../../../core/store/atoms/locationAtom';
 import { useMap } from '../../map/MapProvider';
-import { useNavigate } from 'react-router-dom';
+import { useChiefToast } from '../context/ChiefToastContext';
 
 const useStyles = makeStyles()((theme) => ({
   topBarContainer: {
@@ -75,7 +75,9 @@ export const TopBar: React.FC = () => {
   const { classes } = useStyles();
   const { location, refreshLocation } = useDeviceLocation();
   const { goToLocation } = useMap();
-  const navigate = useNavigate();
+  const { notifications, setIsNotificationCenterOpen } = useChiefToast();
+  
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleRecenter = () => {
     if (location.error) {
@@ -89,9 +91,11 @@ export const TopBar: React.FC = () => {
     <Box className={classes.topBarContainer}>
       <IconButton 
         className={classes.circle}
-        onClick={() => navigate('/notifications')}
+        onClick={() => setIsNotificationCenterOpen(true)}
       >
-        <NotificationsIcon />
+        <Badge badgeContent={unreadCount} color="error" max={99}>
+          <NotificationsIcon />
+        </Badge>
       </IconButton>
 
       <Box className={classes.pill}>

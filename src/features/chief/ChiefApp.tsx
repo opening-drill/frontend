@@ -3,13 +3,14 @@ import { makeStyles } from 'tss-react/mui';
 import { useDeviceLocation } from '../../core/store/atoms/locationAtom';
 import GenericMap from '../map/components/GenericMap';
 import { useMap } from '../map/MapProvider';
+import { NotificationCenter } from './components/NotificationCenter';
 import { TopBar } from './components/TopBar';
 
-import { Box, Button } from '@mui/material';
+import { Box } from '@mui/material';
 import React from 'react';
 import { Slide, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { ChiefToastProvider, useChiefToast } from './context/ChiefToastContext';
+import { ChiefToastProvider } from './context/ChiefToastContext';
   
 const useStyles = makeStyles()((theme) => ({
   root: {
@@ -113,42 +114,12 @@ const ChiefAppContent: React.FC = () => {
       };
     }
   }, [location.latitude, location.longitude, location.heading, goToLocation]);
-  const { addNotification } = useChiefToast();
-
-  const triggerApproved = () => {
-    addNotification('approved', '123747,777886', '13:56:20');
-  };
-
-  const triggerCancelled = () => {
-    addNotification('cancelled', '123747,777886');
-  };
 
   return (
     <Box className={classes.root}>
       <TopBar />
       <GenericMap />
-
-      {/* Floating panel with test buttons */}
-      <Box className={classes.testControls}>
-        <Button
-          variant="contained"
-          color="success"
-          onClick={triggerApproved}
-          className={classes.testButton}
-          disabled={false}
-        >
-          שגר דיווח: אושר
-        </Button>
-        <Button
-          variant="contained"
-          color="error"
-          onClick={triggerCancelled}
-          className={classes.testButton}
-          disabled={false}
-        >
-          שגר דיווח: בוטל
-        </Button>
-      </Box>
+      <NotificationCenter />
 
       {/* Toast notifications container */}
       <ToastContainer

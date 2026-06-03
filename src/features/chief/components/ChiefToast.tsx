@@ -7,6 +7,7 @@ export interface ChiefToastProps {
   type: 'approved' | 'cancelled';
   location: string;
   arrivalTime?: string;
+  timestamp?: string;
   closeToast?: () => void;
   // duration in ms for the TTL, used for custom progress bar
   duration?: number;
@@ -103,6 +104,7 @@ export const ChiefToast: React.FC<ChiefToastProps> = ({
   type,
   location,
   arrivalTime,
+  timestamp,
   closeToast,
   duration,
 }) => {
@@ -144,9 +146,8 @@ export const ChiefToast: React.FC<ChiefToastProps> = ({
         <Typography className={classes.detailText}>
           מיקום התקיפה: <span dir="ltr">[{location}]</span>
         </Typography>
-        {isApproved && arrivalTime && (
-          <Typography className={classes.detailText}>
-            זמן הגעה: {arrivalTime}
+        {timestamp && (
+<Typography className={classes.detailText} sx={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '12px', marginTop: '4px', textAlign: 'left', width: '100%' }}>            {timestamp}
           </Typography>
         )}
       </Box>
