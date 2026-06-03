@@ -1,5 +1,6 @@
 import { atom, useAtom } from 'jotai';
-import { useEffect, useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+
 
 // Define the type for our location state
 export type LocationState = {
@@ -93,16 +94,19 @@ export function useDeviceLocation() {
     // Listen for permission changes so we can auto-refresh if they grant it later
     let permissionStatus: PermissionStatus | null = null;
     if (navigator.permissions && navigator.permissions.query) {
-      navigator.permissions.query({ name: 'geolocation' }).then((status) => {
-        permissionStatus = status;
-        status.onchange = () => {
-          if (status.state === 'granted') {
-            setRefreshKey((prev) => prev + 1);
-          }
-        };
-      }).catch(() => {
-        // Ignored, some browsers don't support geolocation permission query fully
-      });
+      navigator.permissions
+        .query({ name: "geolocation" })
+        .then((status) => {
+          permissionStatus = status;
+          status.onchange = () => {
+            if (status.state === "granted") {
+              setRefreshKey((prev) => prev + 1);
+            }
+          };
+        })
+        .catch(() => {
+          // Ignored, some browsers don't support geolocation permission query fully
+        });
     }
 
     // Cleanup the watcher when the component unmounts
