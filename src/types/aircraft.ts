@@ -6,6 +6,7 @@ export interface AircraftLive {
   heading_degrees: number;
   horizontal_speed_mps: number;
   status: 'free' | 'busy' | 'broken';
+  type: 'attack' | 'movement';
   ts: string; // ISO-8601 UTC
 }
 
@@ -37,3 +38,15 @@ export interface AircraftBatch {
   updates: AircraftLive[];
   ts: string;
 }
+
+export interface GeoViolation {
+  aircraft_id: string;
+  zone_id: string;
+  location: { lng: number; lat: number };
+}
+
+export interface GeoViolationPush {
+  violations: GeoViolation[];
+  total: number;
+}
+

@@ -7,6 +7,7 @@ import type {
   AircraftBatch,
   Zone,
   DispatchLive,
+  GeoViolationPush,
 } from '../../types/aircraft';
 
 const TOKEN_STORAGE_KEY = 'token';
@@ -20,6 +21,7 @@ export interface ServerToClientEvents {
   'dispatch:update': (dispatch: DispatchLive) => void;
   'zone:add': (zone: Zone) => void;
   'zone:remove': (payload: { zone_id: string }) => void;
+  'geo:violation': (payload: GeoViolationPush) => void;
 }
 
 export interface ClientToServerEvents {
