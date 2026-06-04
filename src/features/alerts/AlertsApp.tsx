@@ -111,8 +111,8 @@ export const AlertsApp: React.FC = () => {
     if (!selectedAlert) return;
     approveAttackRequest({ eventId: alert.event_id, 
       aircraftId: alert.recommended_aircraft_id, 
-      start: { latitude: alert.target.lat, longitude: alert.target.lng }, 
-      end: { latitude: alert.target.lat, longitude: alert.target.lng }, 
+      start: { latitude: alert.target.latitude, longitude: alert.target.longitude }, 
+      end: { latitude: alert.target.latitude, longitude: alert.target.longitude }, 
       urgency: alert.urgency_level });
 
     alerts.splice(alerts.findIndex(a => a.event_id === alert.event_id), 1);

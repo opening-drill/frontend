@@ -58,7 +58,7 @@ export default function AttackCard({
         <div>
           <span className={styles.label}>Coordinates:</span>
           <span>
-              {alert.target.lat.toFixed(4)}, {alert.target.lng.toFixed(4)}
+              {alert.target.latitude.toFixed(4)}, {alert.target.longitude.toFixed(4)}
           </span>
         </div>
 

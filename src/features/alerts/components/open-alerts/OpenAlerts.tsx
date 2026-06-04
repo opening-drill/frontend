@@ -23,7 +23,7 @@ export default function AttackCardList({
   const { goToLocation } = useMap();
 
   const handleToggle = (alert: AlertData) => {
-    goToLocation([alert.target!.lng, alert.target!.lat])
+    goToLocation([alert.target!.longitude, alert.target!.latitude])
     setOpenId((prev) => (prev === alert.event_id ? null : alert.event_id!));
   };
 
