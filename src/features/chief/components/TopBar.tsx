@@ -1,7 +1,5 @@
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
-import MyLocationIcon from '@mui/icons-material/MyLocation';
-import NotificationsIcon from '@mui/icons-material/Notifications';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { Box, Typography, IconButton, Badge } from '@mui/material';
 import { alpha } from '@mui/material/styles';

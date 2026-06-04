@@ -81,8 +81,7 @@ export const NotificationCenter: React.FC = () => {
     clearNotifications,
     isNotificationCenterOpen,
     setIsNotificationCenterOpen,
-    markAllAsRead,
-    addNotification
+    markAllAsRead
   } = useChiefToast();
 
   const handleOpen = () => setIsNotificationCenterOpen(true);
