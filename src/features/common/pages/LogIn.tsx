@@ -353,8 +353,28 @@ export const LogIn: React.FC = () => {
           />
 
           {errorMessage && (
-            <Alert severity="error" sx={{ mt: 2, direction: 'rtl' }}>
-              {errorMessage}
+            <Alert
+              severity="error"
+              dir="ltr"
+              sx={{
+                mt: 2,
+                alignItems: 'center',
+                '& .MuiAlert-icon': {
+                  alignItems: 'center',
+                  padding: 0,
+                  marginRight: '12px',
+                },
+                '& .MuiAlert-message': {
+                  width: '100%',
+                  padding: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                },
+              }}
+            >
+              <Box style={{ textAlign: 'right', direction: 'ltr', width: '100%' }}>
+                {errorMessage}
+              </Box>
             </Alert>
           )}
 

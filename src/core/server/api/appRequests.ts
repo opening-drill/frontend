@@ -1,6 +1,5 @@
 import { api } from './axiosClient';
 import type { User } from '../../store/authAtom';
-
 export interface LoginRequest {
   username: string;
   password?: string;
@@ -13,7 +12,7 @@ export interface LoginResponse {
 }
 
 export async function loginRequest(credentials: LoginRequest): Promise<LoginResponse> {
-  const response = await api.post<LoginResponse>('/api/auth/login', {
+  const response = await api.post<LoginResponse>(`/api/auth/login`, {
     username: credentials.username.trim(),
     password: credentials.password,
   });
