@@ -1,6 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Fab, Dialog, IconButton, Box, Typography, Button } from '@mui/material';
-import TargetIcon from '../assets/TargetIcon.svg';
+import { Dialog, IconButton, Box, Typography, Button } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import { makeStyles } from 'tss-react/mui';
@@ -170,7 +169,7 @@ export const OpenCameraButton: React.FC<OpenCameraButtonProps> = ({
     const { classes } = useStyles();
     const [isOpen, setIsOpen] = useState(false);
     const [stream, setStream] = useState<MediaStream | null>(null);
-    const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
+    const [facingMode] = useState<'user' | 'environment'>('environment');
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
     // States for the captured image (passed to photoDialog)

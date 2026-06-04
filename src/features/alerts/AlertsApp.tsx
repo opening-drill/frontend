@@ -4,10 +4,10 @@ import { makeStyles } from 'tss-react/mui';
 import HubIcon from '@mui/icons-material/Hub';
 
 import AttackCardList from './components/open-alerts/OpenAlerts';
-import type { AlertData } from '../../types/hamel';
 import { approveAttackRequest } from '../../core/server/api/approveAttackRequest';
 import { AircraftTable } from './components/aircraft-table/AircraftTable';
 import GenericMap from '../map/components/GenericMap';
+import type { AlertData, RecommendationPush } from '../../types/alertTypes';
 
 
 const useStyles = makeStyles()((theme) => ({
@@ -52,14 +52,9 @@ export const AlertsApp: React.FC = () => {
   {
     event_id: "evt-001",
     received_alert_time: "2026-06-03T14:32:10Z",
-    source: {
-      latitude: 31.7683,
-      longitude: 35.2137,
-      name: "Enemy Tank Column",
-    },
     target: {
-      latitude: 31.7683,
-      longitude: 35.2137,
+      lat: 31.7683,
+      lng: 35.2137,
       name: "Enemy Tank Column",
     },
 
@@ -77,14 +72,9 @@ export const AlertsApp: React.FC = () => {
   {
     event_id: "evt-002",
     received_alert_time: "2026-06-03T14:35:22Z",
-    source: {
-      latitude: 32.0853,
-      longitude: 34.7818,
-      name: "Missile Launcher",
-    },
     target: {
-      latitude: 32.0853,
-      longitude: 34.7818,
+      lat: 32.0853,
+      lng: 34.7818,
       name: "Missile Launcher",
     },
 
@@ -106,12 +96,12 @@ export const AlertsApp: React.FC = () => {
     setOpenConfirm(true);
   };
 
-  const confirm = (alert: AlertData) => {
+  const confirm = (alert: RecommendationPush) => {
     if (!selectedAlert) return;
     approveAttackRequest({ eventId: alert.event_id, 
       aircraftId: alert.recommended_aircraft_id, 
-      start: { latitude: alert.source.latitude, longitude: alert.source.longitude }, 
-      end: { latitude: alert.target.latitude, longitude: alert.target.longitude }, 
+      start: { latitude: alert.target.lat, longitude: alert.target.lng }, 
+      end: { latitude: alert.target.lat, longitude: alert.target.lng }, 
       urgency: alert.urgency_level });
 
     alerts.splice(alerts.findIndex(a => a.event_id === alert.event_id), 1);

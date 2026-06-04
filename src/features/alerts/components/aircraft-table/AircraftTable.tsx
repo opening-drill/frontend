@@ -10,7 +10,7 @@ import config from './AircraftTable.config';
 import { getAirCraftStatus } from "../../../../core/server/api/getAircraftStatus";
 import Loader from "../general/Loader";
 import type { aircraftRowType, aircraftType } from "./AircraftTable.type";
-import type { AlertData } from "../../../../types/hamel";
+import type { AlertData } from "../../../../types/alertTypes";
 
 const rows = [
   { id: "AC-001", name: "Boeing 737 MAX", price: 121_900_000, location: "Chicago O'Hare", status: "Available", payload: 20_000, velocity: 839 },
@@ -35,18 +35,19 @@ export const AircraftTable = (props: { setIsAircraftTableOpen: React.Dispatch<Re
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    const fetchAircraft = async () => {
-      try {
-        setLoading(true);
-        const aircraftData = await getAirCraftStatus();
-        setAircraft(aircraftData?.data ?? []);
-      } catch (err) {
-        console.error("Failed to load aircraft:", err);
-        setAircraft([]); //remove when api is fixed
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchAircraft = async () => {
+    try {
+      setLoading(true);
+      console.log(aircraft);
+      const aircraftData = await getAirCraftStatus();
+      setAircraft(aircraftData?.data ?? []);
+    } catch (err) {
+      console.error("Failed to load aircraft:", err);
+      setAircraft([]); //remove when api is fixed
+    } finally {
+      setLoading(false);
+    }
+  };
 
     fetchAircraft();
   }, []);
