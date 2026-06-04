@@ -146,37 +146,29 @@ const rows = [
   },
 ];
 
-export const AircraftTable = (props: {
-  setIsAircraftTableOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  handleAccept: (alert: AlertData) => void;
-  alert: AlertData | null;
-}) => {
+export const AircraftTable = (props: { setIsAircraftTableOpen: React.Dispatch<React.SetStateAction<boolean>>, handleAccept: (alert: AlertData) => void, alert: AlertData | null }) => {
   const [aircraft, setAircraft] = useState<aircraftType[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-  const fetchAircraft = async () => {
-    try {
-      setLoading(true);
-      console.log(aircraft);
-      const aircraftData = await getAirCraftStatus();
-      setAircraft(aircraftData?.data ?? []);
-    } catch (err) {
-      console.error("Failed to load aircraft:", err);
-      setAircraft([]); //remove when api is fixed
-    } finally {
-      setLoading(false);
-    }
-  };
+    const fetchAircraft = async () => {
+      try {
+        setLoading(true);
+        console.log(aircraft);
+        const aircraftData = await getAirCraftStatus();
+        setAircraft(aircraftData?.data ?? []);
+      } catch (err) {
+        console.error("Failed to load aircraft:", err);
+        setAircraft([]); //remove when api is fixed
+      } finally {
+        setLoading(false);
+      }
+    };
 
     fetchAircraft();
   }, []);
-  const [paginationModel, setPaginationModel] = useState({
-    page: 0,
-    pageSize: 5,
-  });
-  const [selectedAircraft, setSelectedAircraft] =
-    useState<aircraftRowType | null>(null);
+  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
+  const [selectedAircraft, setSelectedAircraft] = useState<aircraftRowType | null>(null);
 
   const handleLaunch = (alert: AlertData) => {
     props.setIsAircraftTableOpen(false);
@@ -187,8 +179,7 @@ export const AircraftTable = (props: {
     <Box
       sx={{
         backgroundColor: "#0a0f1e",
-        backgroundImage:
-          "radial-gradient(ellipse at 20% 10%, rgba(56,189,248,0.05) 0%, transparent 60%), radial-gradient(ellipse at 80% 80%, rgba(99,102,241,0.04) 0%, transparent 60%)",
+        backgroundImage: "radial-gradient(ellipse at 20% 10%, rgba(56,189,248,0.05) 0%, transparent 60%), radial-gradient(ellipse at 80% 80%, rgba(99,102,241,0.04) 0%, transparent 60%)",
         p: { xs: 2, md: 4 },
         fontFamily: "'DM Mono', monospace",
       }}
@@ -196,9 +187,7 @@ export const AircraftTable = (props: {
       {/* Header */}
       <Box sx={{ mb: 3 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 0.5 }}>
-          <FlightIcon
-            sx={{ color: "#38bdf8", fontSize: 22, transform: "rotate(45deg)" }}
-          />
+          <FlightIcon sx={{ color: "#38bdf8", fontSize: 22, transform: "rotate(45deg)" }} />
           <Typography
             variant="h5"
             sx={{
@@ -213,14 +202,7 @@ export const AircraftTable = (props: {
             Aircraft Registry
           </Typography>
         </Box>
-        <Typography
-          sx={{
-            color: "#475569",
-            fontSize: "0.78rem",
-            letterSpacing: "0.06em",
-            pl: "34px",
-          }}
-        >
+        <Typography sx={{ color: "#475569", fontSize: "0.78rem", letterSpacing: "0.06em", pl: "34px" }}>
           {rows.length} aircraft · sortable · filterable
         </Typography>
       </Box>
@@ -258,34 +240,18 @@ export const AircraftTable = (props: {
                 outline: "none !important",
               },
 
-              "& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within":
-                {
-                  outline: "none !important",
-                },
+              "& .MuiDataGrid-columnHeader:focus, & .MuiDataGrid-columnHeader:focus-within": {
+                outline: "none !important",
+              }
             }}
             onRowClick={(newSelection) => {
-              setSelectedAircraft(newSelection.row);
+              setSelectedAircraft(newSelection.row)
             }}
           />
-          <Button
-            sx={{
-              width: "fit-content",
-              color: selectedAircraft !== null ? "blue" : "grey",
-            }}
-            onClick={() =>
-              handleLaunch({
-                ...props.alert!,
-                aircraft_type: selectedAircraft!.name,
-              })
-            }
-            disabled={!selectedAircraft || !props.alert}
-          >
+          <Button sx={{ width: 'fit-content', color: selectedAircraft !== null ? 'blue' : 'grey' }} onClick={() => handleLaunch({ ...props.alert!, aircraft_type: selectedAircraft!.name })} disabled={!selectedAircraft || !props.alert}>
             launch
           </Button>
-          <Button
-            sx={{ width: "fit-content" }}
-            onClick={() => props.setIsAircraftTableOpen(false)}
-          >
+          <Button sx={{ width: 'fit-content' }} onClick={() => props.setIsAircraftTableOpen(false)}>
             cancel
           </Button>
         </Loader>

@@ -7,6 +7,8 @@ import GenericMap from '../map/components/GenericMap';
 import { useMap } from '../map/MapProvider';
 import { NotificationCenter } from './components/NotificationCenter';
 import { TopBar } from './components/TopBar';
+import { useAircraftSocket } from '../../hooks/useAircraftSocket';
+import { useHamelSocket } from '../../hooks/useHamelSocket';
 
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import { Box, IconButton } from '@mui/material';
@@ -133,7 +135,7 @@ const ChiefAppContent: React.FC = () => {
   const { classes } = useStyles();
   const { location, refreshLocation } = useDeviceLocation();
   const { goToLocation } = useMap();
-  
+
   // Initialize bomb drop socket listener
   useBombNotification();
 
@@ -152,73 +154,81 @@ const ChiefAppContent: React.FC = () => {
       }
     }
 
-    if (location.error) {
-      refreshLocation();
-    } else if (location.longitude && location.latitude) {
-      goToLocation([location.longitude, location.latitude]);
-    }
-  };
+    // Initialize socket connections
+    useAircraftSocket();
+    useHamelSocket();
 
-  const hasCenteredRef = useRef(false);
-  const lastUpdateRef = useRef<number>(Date.now());
-  const lastMapInteraction = useAtomValue(lastMapInteractionAtom);
-
-  // Auto-center effect with interaction cooldown
-  useEffect(() => {
-    if (!location.latitude || !location.longitude) return;
-
-    // Center the map immediately on first load
-    if (!hasCenteredRef.current) {
-      goToLocation([location.longitude, location.latitude], 19.5);
-      hasCenteredRef.current = true;
-      lastUpdateRef.current = Date.now();
-      return;
-    }
-
-    // If we don't have a compass heading, we don't auto-track 
-    // (per the requirement: "when there is a heading...")
-    if (location.heading === null || location.heading === undefined) {
-      return;
-    }
-
-    const checkAndTrack = () => {
-      const now = Date.now();
-      const timeSinceInteraction = now - lastMapInteraction;
-      
-      // Cooldown: wait 3 seconds after the user touches the map before resuming
-      if (timeSinceInteraction >= 3000) {
-        const timeSinceLastUpdate = now - lastUpdateRef.current;
-        // Re-center every 1 second
-        if (timeSinceLastUpdate >= 1000) {
-          // Pass undefined for zoom so it pans smoothly without resetting the user's manual zoom
-          goToLocation([location.longitude!, location.latitude!], undefined);
-          lastUpdateRef.current = Date.now();
-        }
+    const handleRecenter = () => {
+      if (location.error) {
+        refreshLocation();
+      } else if (location.longitude && location.latitude) {
+        goToLocation([location.longitude, location.latitude]);
       }
     };
 
-    // Check immediately on every location state update
-    checkAndTrack();
+    const hasCenteredRef = useRef(false);
+    const lastUpdateRef = useRef<number>(Date.now());
+    const lastMapInteraction = useAtomValue(lastMapInteractionAtom);
 
-    // Also run an interval loop to continuously pull the map back 1 second after cooldown expires
-    // even if location hasn't changed
-    const intervalId = setInterval(checkAndTrack, 500);
+    // Auto-center effect with interaction cooldown
+    useEffect(() => {
+      if (!location.latitude || !location.longitude) return;
 
-    return () => clearInterval(intervalId);
-  }, [location.latitude, location.longitude, location.heading, lastMapInteraction, goToLocation]);
+      // Center the map immediately on first load
+      if (!hasCenteredRef.current) {
+        goToLocation([location.longitude, location.latitude], 19.5);
+        hasCenteredRef.current = true;
+        lastUpdateRef.current = Date.now();
+        return;
+      }
+
+      // If we don't have a compass heading, we don't auto-track 
+      // (per the requirement: "when there is a heading...")
+      if (location.heading === null || location.heading === undefined) {
+        return;
+      }
+
+      const checkAndTrack = () => {
+        const now = Date.now();
+        const timeSinceInteraction = now - lastMapInteraction;
+
+        // Cooldown: wait 3 seconds after the user touches the map before resuming
+        if (timeSinceInteraction >= 3000) {
+          const timeSinceLastUpdate = now - lastUpdateRef.current;
+          // Re-center every 1 second
+          if (timeSinceLastUpdate >= 1000) {
+            // Pass undefined for zoom so it pans smoothly without resetting the user's manual zoom
+            goToLocation([location.longitude!, location.latitude!], undefined);
+            lastUpdateRef.current = Date.now();
+          }
+        }
+      };
+
+      // Check immediately on every location state update
+      checkAndTrack();
+
+      // Also run an interval loop to continuously pull the map back 1 second after cooldown expires
+      // even if location hasn't changed
+      const intervalId = setInterval(checkAndTrack, 500);
+
+      return () => clearInterval(intervalId);
+    }, [location.latitude, location.longitude, location.heading, lastMapInteraction, goToLocation]);
+
+
+  };
 
   return (
     <Box className={classes.root}>
       <TopBar />
-      <GenericMap />
+      <GenericMap drones={[]} />
 
       <Box className={classes.cameraButtonContainer}>
         <OpenCameraButton />
       </Box>
 
       <Box className={classes.recenterButtonContainer}>
-        <IconButton 
-          className={classes.recenterCircle} 
+        <IconButton
+          className={classes.recenterCircle}
           onClick={handleRecenter}
           size="large"
         >
@@ -237,8 +247,8 @@ const ChiefAppContent: React.FC = () => {
         limit={3}
       />
     </Box>
-  );
-};
+  );;
+}
 
 export const ChiefApp: React.FC = () => {
   return (

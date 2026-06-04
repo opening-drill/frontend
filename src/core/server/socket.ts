@@ -1,20 +1,14 @@
 import { io, type Socket } from 'socket.io-client';
 import type {
-  RecommendationPush,
-  EventUpdate,
-} from '../../types/hamel';
-import type {
-  Snapshot,
   AircraftBatch,
-  Zone,
   DispatchLive,
+  GeoViolationPush,
+  Snapshot,
+  Zone,
 } from '../../types/aircraft';
+import type { EventUpdate, RecommendationPush } from '../../types/hamel';
 
-const AUTH_TOKEN_STORAGE_KEY = 'auth_token';
 const LIVE_NAMESPACE = '/live';
-const DISCONNECT_DELAY_MS = 250;
-let activeSocketConsumers = 0;
-let disconnectTimeoutId: number | null = null;
 
 export interface ServerToClientEvents {
   'recommendation:new': (recommendation: RecommendationPush) => void;
@@ -24,6 +18,7 @@ export interface ServerToClientEvents {
   'dispatch:update': (dispatch: DispatchLive) => void;
   'zone:add': (zone: Zone) => void;
   'zone:remove': (payload: { zone_id: string }) => void;
+  'geo:violation': (payload: GeoViolationPush) => void;
 }
 
 export interface ClientToServerEvents {
@@ -32,64 +27,75 @@ export interface ClientToServerEvents {
 
 export type LiveSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
-const getSocketBaseUrl = (): string => {
-  return import.meta.env.VITE_SOCKET_URL ?? 'https://live-data-1015949672422.europe-west1.run.app';
-};
-
+/**
+ * Reads the auth token from localStorage.
+ * Jotai's atomWithStorage serializes values as JSON, so the raw
+ * stored value is a JSON-encoded string (e.g. `"\"eyJ...\""`).
+ * We JSON.parse it to get the plain JWT string.
+ */
 const getAuthToken = (): string | null => {
-  const storedToken = localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
-
-  if (!storedToken) {
+  try {
+    const raw = localStorage.getItem('auth_token');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return typeof parsed === 'string' ? parsed : null;
+  } catch {
     return null;
   }
-
-  try {
-    const parsedToken: unknown = JSON.parse(storedToken);
-    return typeof parsedToken === 'string' ? parsedToken : null;
-  } catch {
-    return storedToken;
-  }
 };
 
-export const socket: LiveSocket = io(`${getSocketBaseUrl()}${LIVE_NAMESPACE}`, {
-  auth: {
-    token: getAuthToken(),
-  },
-  autoConnect: false,
-  transports: ['websocket'],
-});
+const getSocketBaseUrl = (): string => {
+  const url =
+    import.meta.env.VITE_SOCKET_URL ||
+    import.meta.env.VITE_API_URL ||
+    '';
+  return url.replace(/\/+$/, '');
+};
 
+// ─── Singleton socket ─────────────────────────────────────────────────────────
+let _socket: LiveSocket | null = null;
+let _refCount = 0;
+
+const getOrCreateSocket = (): LiveSocket => {
+  if (!_socket) {
+    _socket = io(`${getSocketBaseUrl()}${LIVE_NAMESPACE}`, {
+      auth: { token: getAuthToken() },
+      autoConnect: false,
+      transports: ['websocket'],
+    });
+  }
+  return _socket;
+};
+
+/**
+ * Call once per hook/component that wants to use the live socket.
+ * Increments the reference count; actually connects on first call.
+ */
 export const initializeLiveSocket = (): LiveSocket => {
-  activeSocketConsumers += 1;
+  const sock = getOrCreateSocket();
 
-  if (disconnectTimeoutId !== null) {
-    window.clearTimeout(disconnectTimeoutId);
-    disconnectTimeoutId = null;
+  // Refresh auth token every time a new consumer connects
+  sock.auth = { token: getAuthToken() };
+
+  _refCount++;
+  if (!sock.connected) {
+    sock.connect();
   }
 
-  socket.auth = {
-    token: getAuthToken(),
-  };
-
-  if (!socket.connected) {
-    socket.connect();
-  }
-
-  return socket;
+  return sock;
 };
 
+/**
+ * Call in the cleanup of every hook/component that called initializeLiveSocket.
+ * Only physically disconnects when the last consumer releases the socket.
+ */
 export const disconnectLiveSocket = (): void => {
-  activeSocketConsumers = Math.max(0, activeSocketConsumers - 1);
-
-  if (activeSocketConsumers > 0) {
-    return;
+  _refCount = Math.max(0, _refCount - 1);
+  if (_refCount === 0 && _socket) {
+    _socket.disconnect();
+    _socket = null;
   }
-
-  disconnectTimeoutId = window.setTimeout(() => {
-    if (activeSocketConsumers === 0) {
-      socket.disconnect();
-    }
-
-    disconnectTimeoutId = null;
-  }, DISCONNECT_DELAY_MS);
 };
+
+/** Direct access to the current singleton (may be null if not initialised). */
+export const socket: LiveSocket = getOrCreateSocket();

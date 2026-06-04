@@ -56,6 +56,10 @@ const useStyles = makeStyles()((theme) => ({
 export const AlertsApp: React.FC = () => {
   const { classes } = useStyles();
 
+  // Initialize socket connections
+  useAircraftSocket();
+  useHamelSocket();
+
   const alerts: AlertData[] = [
     {
       event_id: "evt-001",

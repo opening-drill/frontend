@@ -21,6 +21,18 @@ export default defineConfig(({ mode }) => {
           secure: false,
           rewrite: (path) => path.replace(/^\/alerts-api/, ''),
         },
+        '/live': {
+          target: apiTarget,
+          changeOrigin: true,
+          secure: false,
+          ws: true,
+        },
+        '/socket.io': {
+          target: apiTarget,
+          changeOrigin: true,
+          secure: false,
+          ws: true,
+        },
       },
     },
   }

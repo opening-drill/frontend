@@ -21,9 +21,18 @@ export const alertsApi: AxiosInstance = axios.create({
   baseURL: getApiBaseUrl(),
 });
 
+const getAuthToken = (): string | null => {
+  try {
+    const rawToken = localStorage.getItem('auth_token');
+    return rawToken ? JSON.parse(rawToken) : null;
+  } catch {
+    return null;
+  }
+};
+
 alertsApi.interceptors.request.use(
   (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
-    const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+    const token = getAuthToken();
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -37,10 +46,12 @@ alertsApi.interceptors.response.use(
   (response) => response,
   (error: AxiosError): Promise<never> => {
     if (error.response?.status === 401) {
-      localStorage.removeItem(TOKEN_STORAGE_KEY);
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
       redirectToLogin();
     }
 
     return Promise.reject(error);
   },
 );
+
