@@ -59,14 +59,17 @@ export function useDeviceLocation() {
     // Small delay ensures the "Loading..." UI flashes if the user clicks to retry
     const delayId = setTimeout(() => {
       watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        setLocation({
+      (position) => {        
+        setLocation((prev) => ({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
-          heading: position.coords.heading,
+          // Preserve the compass heading if GPS doesn't provide one
+          heading: position.coords.heading !== null && !isNaN(position.coords.heading) 
+            ? position.coords.heading 
+            : prev.heading,
           error: null,
           loading: false,
-        });
+        }));
       },
       (error) => {
         let errorMessage = 'שגיאה לא ידועה באיתור המיקום';
@@ -84,9 +87,9 @@ export function useDeviceLocation() {
         setLocation((prev) => ({ ...prev, error: errorMessage, loading: false }));
       },
       {
-        enableHighAccuracy: false, // Low accuracy is much more reliable on mobile devices
-        timeout: 10000,
-        maximumAge: 5000,
+        enableHighAccuracy: true, // Required for actual device location instead of a random cell tower
+        timeout: 15000,
+        maximumAge: 2000,
       }
     );
     }, 400);
@@ -109,6 +112,32 @@ export function useDeviceLocation() {
         });
     }
 
+    // Compass heading fallback for stationary devices
+    const handleOrientation = (event: any) => {
+      let compassHeading: number | null = null;
+      if (event.webkitCompassHeading !== undefined && event.webkitCompassHeading !== null) {
+        // iOS devices
+        compassHeading = event.webkitCompassHeading;
+      } else if (event.alpha !== null && event.alpha !== undefined) {
+        // Android devices
+        // Alpha increases counter-clockwise, so we subtract from 360 for true heading
+        compassHeading = 360 - event.alpha;
+      }
+
+      if (compassHeading !== null) {
+        setLocation((prev) => {
+          // Only trigger a state update if heading changed by at least 2 degrees to avoid render thrashing
+          if (prev.heading === null || Math.abs(prev.heading - compassHeading!) > 2) {
+            return { ...prev, heading: compassHeading };
+          }
+          return prev;
+        });
+      }
+    };
+
+    window.addEventListener("deviceorientationabsolute", handleOrientation);
+    window.addEventListener("deviceorientation", handleOrientation);
+
     // Cleanup the watcher when the component unmounts
     return () => {
       clearTimeout(delayId);
@@ -118,6 +147,8 @@ export function useDeviceLocation() {
       if (permissionStatus) {
         permissionStatus.onchange = null;
       }
+      window.removeEventListener("deviceorientationabsolute", handleOrientation);
+      window.removeEventListener("deviceorientation", handleOrientation);
     };
   }, [setLocation, refreshKey]);
 
