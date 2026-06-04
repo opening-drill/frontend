@@ -7,10 +7,10 @@ import {
 } from "@mui/material";
 import FlightIcon from "@mui/icons-material/Flight";
 import config from './AircraftTable.config';
-import { getAirCraftStatus } from "../../../../core/server/api/getAircraftStatus";
 import Loader from "../general/Loader";
 import type { aircraftRowType, aircraftType } from "./AircraftTable.type";
 import type { RecommendationPush } from "../../../../types/hamel";
+import { getAirCraftStatus } from "../../../../core/server/api/getAircraftSatus";
 
 const rows = [
   { id: "AC-001", name: "Boeing 737 MAX", price: 121_900_000, location: "Chicago O'Hare", status: "Available", payload: 20_000, velocity: 839 },
@@ -38,7 +38,6 @@ export const  AircraftTable = (props: { setIsAircraftTableOpen: React.Dispatch<R
   const fetchAircraft = async () => {
     try {
       setLoading(true);
-      console.log(aircraft);
       const aircraftData = await getAirCraftStatus();
       setAircraft(aircraftData?.data ?? []);
     } catch (err) {
