@@ -1,13 +1,18 @@
-import type { AlertData } from "../../../../types/alertTypes";
+import type { MouseEvent } from "react";
+import type { RecommendationPush } from "../../../../types/hamel";
 import styles from "./AlertPreview.module.css";
 
+type AlertPreviewData = RecommendationPush & {
+  received_alert_time?: string;
+};
+
 interface AttackCardProps {
-  alert: AlertData;
+  alert: AlertPreviewData;
   open: boolean;
-  onAccept: (alert: AlertData) => void;
-  onDecline: (alert: AlertData) => void;
-  onChooseAnother: (alert: AlertData) => void;
-  setAlert: (alert: AlertData) => void;
+  onAccept: (alert: RecommendationPush) => void;
+  onDecline: (alert: RecommendationPush) => void;
+  onChooseAnother: (alert: RecommendationPush) => void;
+  setAlert: (alert: RecommendationPush) => void;
 }
 
 export default function AttackCard({
@@ -18,12 +23,17 @@ export default function AttackCard({
   onChooseAnother,
   setAlert,
 }: AttackCardProps) {
+  const receivedTime = alert.received_alert_time
+    ? new Date(alert.received_alert_time).toLocaleTimeString()
+    : "";
+  const stopCardToggle = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+  };
+
   if (!open) {
     return (
       <div className={`${styles.card} ${styles.closed}`}>
-        <span className={styles.time}>
-          {new Date(alert.received_alert_time).toLocaleTimeString()}
-        </span>
+        {receivedTime && <span className={styles.time}>{receivedTime}</span>}
 
         <span className={styles.summary}>
           Detected {alert.target.name ?? "Target"} • Launch{" "}
@@ -38,9 +48,7 @@ export default function AttackCard({
       <div className={styles.header}>
         <h4>{alert.target.name ?? "Unknown Target"}</h4>
 
-        <span className={styles.time}>
-          {new Date(alert.received_alert_time).toLocaleTimeString()}
-        </span>
+        {receivedTime && <span className={styles.time}>{receivedTime}</span>}
       </div>
 
       <img
@@ -83,21 +91,31 @@ export default function AttackCard({
       <div className={styles.actions}>
         <button
           className={styles.acceptBtn}
-          onClick={() => onAccept(alert)}
+          onClick={(event) => {
+            stopCardToggle(event);
+            onAccept(alert);
+          }}
         >
           Accept
         </button>
 
         <button
           className={styles.declineBtn}
-          onClick={() => onDecline(alert)}
+          onClick={(event) => {
+            stopCardToggle(event);
+            onDecline(alert);
+          }}
         >
           Decline
         </button>
 
         <button
           className={styles.changeBtn}
-          onClick={() => {setAlert(alert); onChooseAnother(alert)}}
+          onClick={(event) => {
+            stopCardToggle(event);
+            setAlert(alert);
+            onChooseAnother(alert);
+          }}
         >
           Change Aircraft
         </button>

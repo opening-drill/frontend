@@ -7,9 +7,11 @@ import AttackCardList from './components/open-alerts/OpenAlerts';
 import { approveAttackRequest } from '../../core/server/api/approveAttackRequest';
 import { AircraftTable } from './components/aircraft-table/AircraftTable';
 import GenericMap from '../map/components/GenericMap';
-import type { AlertData, RecommendationPush } from '../../types/alertTypes';
+import type { RecommendationPush } from '../../types/hamel';
 import { useHamelSocket } from '../../hooks/useHamelSocket';
 import { useAircraftSocket } from '../../hooks/useAircraftSocket';
+import { useAtom, useSetAtom } from 'jotai';
+import { activeIdAtom, activeRecommendationAtom } from '../../store/recommendationAtoms';
 
 
 const useStyles = makeStyles()((theme) => ({
@@ -49,51 +51,15 @@ const useStyles = makeStyles()((theme) => ({
 
 export const AlertsApp: React.FC = () => {
   const { classes } = useStyles();
+  const [alerts, setAlerts] = useAtom(activeRecommendationAtom);
+  const setActiveId = useSetAtom(activeIdAtom);
 
-  const alerts: AlertData[] = [
-  {
-    event_id: "evt-001",
-    received_alert_time: "2026-06-03T14:32:10Z",
-    target: {
-      lat: 31.7683,
-      lng: 35.2137,
-      name: "Enemy Tank Column",
-    },
+  const removeAlert = (eventId: string) => {
+    setAlerts((currentAlerts) => currentAlerts.filter((alert) => alert.event_id !== eventId));
+    setActiveId((currentActiveId) => (currentActiveId === eventId ? null : currentActiveId));
+  };
 
-    image_url:
-      "https://images.unsplash.com/photo-1511884642898-4c92249e20b6",
-
-    recommended_aircraft_id: "aircraft-f16-01",
-    aircraft_type: "F-16",
-
-    urgency_level: "critical",
-
-    rationale:
-      "Fastest available aircraft with sufficient payload.",
-  },
-  {
-    event_id: "evt-002",
-    received_alert_time: "2026-06-03T14:35:22Z",
-    target: {
-      lat: 32.0853,
-      lng: 34.7818,
-      name: "Missile Launcher",
-    },
-
-    image_url:
-      "https://images.unsplash.com/photo-1548013146-72479768bada",
-
-    recommended_aircraft_id: "aircraft-heron-03",
-    aircraft_type: "Heron UAV",
-
-    urgency_level: "critical",
-
-    rationale:
-      "Persistent surveillance recommended before strike.",
-  },
-];
-
-  const handleAccept = (alert: AlertData) => {
+  const handleAccept = (alert: RecommendationPush) => {
     setSelectedAlert(alert);
     setOpenConfirm(true);
   };
@@ -106,13 +72,13 @@ export const AlertsApp: React.FC = () => {
       end: { latitude: alert.target.lat, longitude: alert.target.lng }, 
       urgency: alert.urgency_level });
 
-    alerts.splice(alerts.findIndex(a => a.event_id === alert.event_id), 1);
+    removeAlert(alert.event_id);
     setOpenConfirm(false);
     setSelectedAlert(null);
   };
 
-  const handleDecline = (alert: AlertData) => {
-    alerts.splice(alerts.findIndex(a => a.event_id === alert.event_id), 1);
+  const handleDecline = (alert: RecommendationPush) => {
+    removeAlert(alert.event_id);
   };
 
   const handleChooseAnother = () => {
@@ -126,7 +92,7 @@ export const AlertsApp: React.FC = () => {
 
   const [isAircraftTableOpen, setIsAircraftTableOpen] = useState(false)
   const [openConfirm, setOpenConfirm] = React.useState(false);
-  const [selectedAlert, setSelectedAlert] = React.useState<AlertData | null>(null);
+  const [selectedAlert, setSelectedAlert] = React.useState<RecommendationPush | null>(null);
   useHamelSocket();
   useAircraftSocket();
 

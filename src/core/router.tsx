@@ -22,7 +22,7 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 const RootRouter: React.FC = () => {
   const user = useAtomValue(userAtom);
-  const role = user?.role;
+  const role = 2;
 
   return (
     <Routes>

@@ -10,7 +10,7 @@ import config from './AircraftTable.config';
 import { getAirCraftStatus } from "../../../../core/server/api/getAircraftStatus";
 import Loader from "../general/Loader";
 import type { aircraftRowType, aircraftType } from "./AircraftTable.type";
-import type { AlertData } from "../../../../types/alertTypes";
+import type { RecommendationPush } from "../../../../types/hamel";
 
 const rows = [
   { id: "AC-001", name: "Boeing 737 MAX", price: 121_900_000, location: "Chicago O'Hare", status: "Available", payload: 20_000, velocity: 839 },
@@ -30,7 +30,7 @@ const rows = [
   { id: "AC-015", name: "Boeing 787-9", price: 292_500_000, location: "Tokyo Haneda", status: "Reserved", payload: 43_800, velocity: 903 },
 ];
 
-export const  AircraftTable = (props: { setIsAircraftTableOpen: React.Dispatch<React.SetStateAction<boolean>>, handleAccept: (alert: AlertData) => void, alert: AlertData | null }) => {
+export const  AircraftTable = (props: { setIsAircraftTableOpen: React.Dispatch<React.SetStateAction<boolean>>, handleAccept: (alert: RecommendationPush) => void, alert: RecommendationPush | null }) => {
   const [aircraft, setAircraft] = useState<aircraftType[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -54,7 +54,7 @@ export const  AircraftTable = (props: { setIsAircraftTableOpen: React.Dispatch<R
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
   const [selectedAircraft, setSelectedAircraft] = useState<aircraftRowType | null>(null);
 
-  const handleLaunch = (alert: AlertData) => {
+  const handleLaunch = (alert: RecommendationPush) => {
     props.setIsAircraftTableOpen(false);
     props.handleAccept(alert);
   }

@@ -18,6 +18,7 @@ export const useHamelSocket = (): void => {
     const handleRecommendation = (
       recommendation: RecommendationPush,
     ): void => {
+      console.log(recommendation)
       setActiveRecommendation((currentQueue) => [...currentQueue, recommendation]);
     };
 

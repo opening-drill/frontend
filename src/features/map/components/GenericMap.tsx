@@ -30,6 +30,7 @@ import type { AircraftLive } from "../../../types/aircraft";
 import { useMap } from "../MapProvider";
 import "../index.css";
 import { LOCATIONS } from "../utils/mapUtils";
+import { RecommendationTargetMarker } from "./RecommendationTargetMarker";
 
 const useStyles = makeStyles()((theme) => ({
   mapContainer: {
@@ -336,6 +337,7 @@ const GenericMap = () => {
   const [activeColor, setActiveColor] = useState<string>("#00e5ff"); 
   const [isToolbarOpen, setIsToolbarOpen] = useState<boolean>(false); 
   const [isAttackModeActive, setIsAttackModeActive] = useState<boolean>(false);
+  const [isMapReady, setIsMapReady] = useState<boolean>(false);
   
   const [attackCoords, setAttackCoords] = useState<{ lat: string; lon: string } | null>(null);
   const [selectedAttackFeature, setSelectedAttackFeature] = useState<Feature | null>(null);
@@ -439,8 +441,10 @@ const GenericMap = () => {
     });
 
     mapRef.current = mapInstance;
+    setIsMapReady(true);
 
     return () => {
+      setIsMapReady(false);
       if (mapRef.current) {
         mapRef.current.setTarget(undefined);
         mapRef.current = null;
@@ -608,6 +612,7 @@ const GenericMap = () => {
   return (
     <Box className={classes.mapContainer}>
       <div ref={mapElement} className={classes.mapTarget} />
+      {isMapReady && <RecommendationTargetMarker />}
 
       <Tooltip title={isAttackModeActive ? "בטל בחירת מטרה" : "סמן נקודת תקיפה"} arrow placement="left">
         <IconButton 

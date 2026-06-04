@@ -1,14 +1,15 @@
-import { useState } from "react";
 import styles from "./OpenAlertsList.module.css";
 import AttackCard from "../alert-preview/AlertPreview";
-import type { AlertData } from "../../../../types/alertTypes";
+import type { RecommendationPush } from "../../../../types/hamel";
+import { activeIdAtom } from "../../../../store/recommendationAtoms";
+import { useAtom } from "jotai";
 
 interface Props {
-  alerts: AlertData[];
-  onAccept: (alert: AlertData) => void;
-  onDecline: (alert: AlertData) => void;
-  onChooseAnother: (alert: AlertData) => void;
-  setAlert: (alert: AlertData) => void;
+  alerts: RecommendationPush[];
+  onAccept: (alert: RecommendationPush) => void;
+  onDecline: (alert: RecommendationPush) => void;
+  onChooseAnother: (alert: RecommendationPush) => void;
+  setAlert: (alert: RecommendationPush) => void;
 }
 
 export default function AttackCardList({
@@ -18,7 +19,7 @@ export default function AttackCardList({
   onChooseAnother,
   setAlert,
 }: Props) {
-  const [openId, setOpenId] = useState<string | null>(null);
+  const [openId, setOpenId] = useAtom(activeIdAtom);
 
   const handleToggle = (id: string) => {
     setOpenId((prev) => (prev === id ? null : id));
