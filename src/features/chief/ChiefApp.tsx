@@ -8,7 +8,9 @@ import { useMap } from '../map/MapProvider';
 import { NotificationCenter } from './components/NotificationCenter';
 import { TopBar } from './components/TopBar';
 
-import { Box } from '@mui/material';
+import MyLocationIcon from '@mui/icons-material/MyLocation';
+import { Box, IconButton } from '@mui/material';
+import { alpha } from '@mui/material/styles';
 import React from 'react';
 import { Slide, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -30,6 +32,32 @@ const useStyles = makeStyles()((theme) => ({
     zIndex: 1000,
     [theme.breakpoints.down('sm')]: {
       bottom: 30,
+    }
+  },
+  recenterButtonContainer: {
+    position: 'fixed',
+    bottom: 55,
+    left: 20, // using left here because RTL will flip it to physical right
+    zIndex: 1000,
+    [theme.breakpoints.down('sm')]: {
+      bottom: 30,
+      left: 15,
+    }
+  },
+  recenterCircle: {
+    background: alpha(theme.palette.background.paper, 0.85),
+    backdropFilter: 'blur(12px)',
+    border: `1px solid ${alpha(theme.palette.text.primary, 0.1)}`,
+    boxShadow: `0 4px 12px ${alpha(theme.palette.common.black, 0.3)}`,
+    color: theme.palette.text.primary,
+    width: 56,
+    height: 56,
+    '&:hover': {
+      background: alpha(theme.palette.background.paper, 0.95),
+    },
+    [theme.breakpoints.down('sm')]: {
+      width: 48,
+      height: 48,
     }
   },
   toastContainer: {
@@ -100,8 +128,16 @@ const useStyles = makeStyles()((theme) => ({
 
 const ChiefAppContent: React.FC = () => {
   const { classes } = useStyles();
-  const { location } = useDeviceLocation();
+  const { location, refreshLocation } = useDeviceLocation();
   const { goToLocation } = useMap();
+
+  const handleRecenter = () => {
+    if (location.error) {
+      refreshLocation();
+    } else if (location.longitude && location.latitude) {
+      goToLocation([location.longitude, location.latitude]);
+    }
+  };
 
   const lastUpdateRef = useRef<number>(0);
 
@@ -136,6 +172,16 @@ const ChiefAppContent: React.FC = () => {
 
       <Box className={classes.cameraButtonContainer}>
         <OpenCameraButton />
+      </Box>
+
+      <Box className={classes.recenterButtonContainer}>
+        <IconButton 
+          className={classes.recenterCircle} 
+          onClick={handleRecenter}
+          size="large"
+        >
+          <MyLocationIcon />
+        </IconButton>
       </Box>
       <NotificationCenter />
 
