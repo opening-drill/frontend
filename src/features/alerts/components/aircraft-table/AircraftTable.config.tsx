@@ -2,6 +2,7 @@ import { Box, Chip, Typography } from "@mui/material";
 // import type { genericCellParam, numericCellParam, statusCellParam } from "./AircraftTable.type";
 import FlightIcon from "@mui/icons-material/Flight";
 import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import type { aircraftRowType, aircraftType } from "./AircraftTable.type";
 
 
 // const statusConfig = {
@@ -43,8 +44,8 @@ const columns: GridColDef[] = [
     ),
   },
   {
-    field: "payload",
-    headerName: "Payload (Kg)",
+    field: "payloadKg",
+    headerName: "Payload",
     width: 100,
     renderCell: (params: GridRenderCellParams) => (
       <Typography sx={{ fontSize: "0.82rem", color: "#cbd5e1", display: 'flex', alignItems: 'center', height: '100%' }}>{params.value}</Typography>
@@ -55,18 +56,16 @@ const columns: GridColDef[] = [
     headerName: "Price (USD)",
     width: 130,
     type: "number",
-    valueFormatter: (value: number) =>
-      value === 0 ? "Museum Piece" : `$${(value / 1_000_000).toFixed(1)}M`,
     renderCell: (params: GridRenderCellParams) => (
       <Typography sx={{ fontFamily: "'DM Mono', monospace", fontSize: "0.85rem", color: params.value === 0 ? "#64748b" : "#a3e635", fontWeight: 500, display: 'flex', alignItems: 'center', height: '100%' }}>
-        {params.value === 0 ? "Museum Piece" : `$${(params.value / 1_000_000).toFixed(1)}M`}
+        {params.value}
       </Typography>
     ),
   },
-    {
-    field: "velocity",
-    headerName: "Velocity (Km/h)",
-    width: 150,
+  {
+    field: "velocityKmh",
+    headerName: "Velocity (km/h)",
+    width: 190,
     renderCell: (params: GridRenderCellParams) => (
       <Typography sx={{ fontSize: "0.82rem", color: "#cbd5e1", display: 'flex', alignItems: 'center', height: '100%' }}>{params.value}</Typography>
     ),
@@ -96,4 +95,12 @@ const columns: GridColDef[] = [
   },
 ];
 
-export default { columns }
+const formatAircraftToRows = (aircraft: aircraftType[]): aircraftRowType[] => aircraft.map(ac => ({
+  id: ac.id,
+  name: ac.aircraft_type,
+  price: ac.price,
+  velocityKmh: ac.velocity_kmh,
+  payloadKg: ac.payload_kg,
+})) 
+
+export default { columns, formatAircraftToRows }

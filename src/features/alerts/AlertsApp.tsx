@@ -4,10 +4,12 @@ import { makeStyles } from 'tss-react/mui';
 import HubIcon from '@mui/icons-material/Hub';
 
 import AttackCardList from './components/open-alerts/OpenAlerts';
-import type { AlertData } from '../../types/hamel';
 import { approveAttackRequest } from '../../core/server/api/approveAttackRequest';
 import { AircraftTable } from './components/aircraft-table/AircraftTable';
 import GenericMap from '../map/components/GenericMap';
+import type { AlertData, RecommendationPush } from '../../types/alertTypes';
+import { useHamelSocket } from '../../hooks/useHamelSocket';
+import { useAircraftSocket } from '../../hooks/useAircraftSocket';
 
 const useStyles = makeStyles()((theme) => ({
   root: {
@@ -105,12 +107,12 @@ export const AlertsApp: React.FC = () => {
     setOpenConfirm(true);
   };
 
-  const confirm = (alert: AlertData) => {
+  const confirm = (alert: RecommendationPush) => {
     if (!selectedAlert) return;
     approveAttackRequest({ eventId: alert.event_id, 
       aircraftId: alert.recommended_aircraft_id, 
-      start: alert.source ? { latitude: alert.source.latitude, longitude: alert.source.longitude } : undefined, 
-      end: alert.target ? { latitude: alert.target.latitude, longitude: alert.target.longitude } : undefined, 
+      start: { latitude: alert.target.latitude, longitude: alert.target.longitude }, 
+      end: { latitude: alert.target.latitude, longitude: alert.target.longitude }, 
       urgency: alert.urgency_level });
 
     alerts.splice(alerts.findIndex(a => a.event_id === alert.event_id), 1);
@@ -134,6 +136,8 @@ export const AlertsApp: React.FC = () => {
   const [isAircraftTableOpen, setIsAircraftTableOpen] = useState(false)
   const [openConfirm, setOpenConfirm] = React.useState(false);
   const [selectedAlert, setSelectedAlert] = React.useState<AlertData | null>(null);
+  useHamelSocket();
+  useAircraftSocket();
 
   return (
     <Box className={classes.root}>
