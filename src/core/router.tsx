@@ -5,8 +5,8 @@ import { ChiefApp } from '../features/chief/ChiefApp';
 import { LogIn } from '../features/common/pages/LogIn';
 import { Onboarding } from '../features/common/pages/Onboarding';
 
-import { isAuthenticatedAtom, userAtom } from './store/authAtom';
 import { AlertsApp } from '../features/alerts/AlertsApp';
+import { isAuthenticatedAtom, userAtom } from './store/authAtom';
 
 // Guard for authenticated-only routes
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
