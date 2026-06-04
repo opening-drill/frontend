@@ -96,14 +96,14 @@ export const TopBar: React.FC = () => {
 
       <Box className={classes.pill}>
         <LocationOnIcon color="primary" fontSize="large" sx={{ flexShrink: 0 }} />
-        {location.loading ? (
-          <Typography variant="h5" className={classes.loading}>מאתר מיקום...</Typography>
+        {location.latitude && location.longitude ? (
+          <Typography variant="h5" sx={{ fontWeight: 600, letterSpacing: '0.05em' }}>
+            {location.latitude.toFixed(5)}°, {location.longitude.toFixed(5)}°
+          </Typography>
         ) : location.error ? (
           <Typography variant="h5" className={classes.error}>שגיאה באיתור מיקום</Typography>
         ) : (
-          <Typography variant="h5" sx={{ fontWeight: 600, letterSpacing: '0.05em' }}>
-            {location.latitude?.toFixed(5)}°, {location.longitude?.toFixed(5)}°
-          </Typography>
+          <Typography variant="h5" className={classes.loading}>מאתר מיקום...</Typography>
         )}
       </Box>
 
