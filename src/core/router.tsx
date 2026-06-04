@@ -1,11 +1,12 @@
 import { useAtomValue } from 'jotai';
 import React from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { BaseOpsApp } from '../features/base-ops/BaseOpsApp';
 import { ChiefApp } from '../features/chief/ChiefApp';
 import { LogIn } from '../features/common/pages/LogIn';
 import { Onboarding } from '../features/common/pages/Onboarding';
+
 import { isAuthenticatedAtom, userAtom } from './store/authAtom';
+import { AlertsApp } from '../features/alerts/AlertsApp';
 
 // Guard for authenticated-only routes
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -49,7 +50,7 @@ const RootRouter: React.FC = () => {
         path="/"
         element={
           <ProtectedRoute>
-            {role === '2' ? <ChiefApp /> : <BaseOpsApp />}
+            {role === '1' ? <ChiefApp /> : <AlertsApp />}
           </ProtectedRoute>
         }
       />
