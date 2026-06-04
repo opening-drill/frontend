@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Box, Button, Typography, Paper, TextField } from '@mui/material';
+import { Box, Button, Typography, Paper, TextField, Alert, CircularProgress } from '@mui/material';
 import { makeStyles } from 'tss-react/mui';
 import { useNavigate } from 'react-router-dom';
 import { useSetAtom } from 'jotai';
+import axios from 'axios';
 import { tokenAtom, userAtom } from '../../../core/store/authAtom';
+import { loginRequest } from '../../../core/server/api/appRequests';
 
 const NUMBER_OF_TARGETS = 15;
 const RADAR_SCAN_INTERVAL_MS = 4000;
@@ -240,6 +242,8 @@ export const LogIn: React.FC = () => {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [backgroundTargets, setBackgroundTargets] = useState<BackgroundTarget[]>([]);
 
   const generateFreshTargets = useCallback(() => {
@@ -261,20 +265,39 @@ export const LogIn: React.FC = () => {
     return () => clearInterval(scanInterval);
   }, [generateFreshTargets]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Dummy Auth Success:', { username, password });
-    setToken('dummy-token');
-    alert(`נשלח לפונקציית התחברות:\nמשתמש: ${username}\nסיסמה: ${password}`);
-    window.location.href = '/';
-    setUser({
-      id: '1',
-      first_name: username,
-      last_name: '',
-      role: '1',
-      permissions: [],
-    });
-    navigate('/', { replace: true });
+    if (isSubmitting) return;
+
+    setErrorMessage(null);
+    setIsSubmitting(true);
+
+    try {
+      const { token, user } = await loginRequest({
+        username: username.trim(),
+        password,
+      });
+
+      setToken(token);
+      setUser(user);
+      navigate('/', { replace: true });
+    } catch (error) {
+      let message = 'התחברות נכשלה. נסה שוב.';
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          message = 'שם משתמש או סיסמה שגויים';
+        } else if (!error.response) {
+          message = 'שגיאת רשת - לא ניתן להתחבר לשרת';
+        } else if (typeof error.response.data === 'object' && error.response.data && 'message' in error.response.data) {
+          message = String((error.response.data as { message: unknown }).message);
+        }
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
+      setErrorMessage(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -314,6 +337,7 @@ export const LogIn: React.FC = () => {
             label="שם משתמש"
             value={username}
             className={classes.input}
+            disabled={isSubmitting}
             onChange={(e) => setUsername(e.target.value)}
           />
           <TextField
@@ -324,10 +348,44 @@ export const LogIn: React.FC = () => {
             label="סיסמא"
             value={password}
             className={classes.input}
+            disabled={isSubmitting}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <Button type="submit" fullWidth variant="contained" className={classes.submit}>
-            התחברות
+
+          {errorMessage && (
+            <Alert
+              severity="error"
+              dir="ltr"
+              sx={{
+                mt: 2,
+                alignItems: 'center',
+                '& .MuiAlert-icon': {
+                  alignItems: 'center',
+                  padding: 0,
+                  marginRight: '12px',
+                },
+                '& .MuiAlert-message': {
+                  width: '100%',
+                  padding: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                },
+              }}
+            >
+              <Box style={{ textAlign: 'right', direction: 'ltr', width: '100%' }}>
+                {errorMessage}
+              </Box>
+            </Alert>
+          )}
+
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            className={classes.submit}
+            disabled={isSubmitting || !username || !password}
+          >
+            {isSubmitting ? <CircularProgress size={22} sx={{ color: '#fff' }} /> : 'התחברות'}
           </Button>
         </form>
 
