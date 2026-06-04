@@ -21,7 +21,7 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
     coords: number[],
     zoom: number = 19.5,
     heading?: number
-  ) => {
+  ) => {    
     if (mapRef.current) {
       const rotationInRadians = heading ? heading * (Math.PI / 180) : 0;
 
@@ -30,8 +30,9 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
         zoom: zoom,
         duration: 2000,
         rotation: rotationInRadians,
-      });
+      });      
     }
+
   };
 
   return (

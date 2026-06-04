@@ -2,6 +2,7 @@ import { useState } from "react";
 import styles from "./OpenAlertsList.module.css";
 import type { AlertData } from "../../../../types/hamel";
 import AttackCard from "../alert-preview/AlertPreview";
+import { useMap } from "../../../map/MapProvider";
 
 interface Props {
   alerts: AlertData[];
@@ -19,9 +20,11 @@ export default function AttackCardList({
   setAlert,
 }: Props) {
   const [openId, setOpenId] = useState<string | null>(null);
+  const { goToLocation } = useMap();
 
-  const handleToggle = (id: string | null) => {
-    setOpenId((prev) => (prev === id ? null : id));
+  const handleToggle = (alert: AlertData) => {
+    goToLocation([alert.target.longitude, alert.target.latitude])
+    setOpenId((prev) => (prev === alert.event_id ? null : alert.event_id));
   };
 
   return (
@@ -29,7 +32,7 @@ export default function AttackCardList({
         {alerts.map((alert) => (
           <div
             key={alert.event_id}
-            onClick={() => handleToggle(alert.event_id ?? null)}>
+            onClick={() => handleToggle(alert)}>
             <AttackCard
               alert={alert}
               open={openId === alert.event_id}
