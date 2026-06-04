@@ -102,10 +102,8 @@ const useStyles = makeStyles()((theme) => ({
 export const ChiefToast: React.FC<ChiefToastProps> = ({
   type,
   location,
-  arrivalTime,
   timestamp,
-  closeToast,
-  duration,
+  closeToast
 }) => {
   const { classes, cx } = useStyles();
   const isApproved = type === 'approved';

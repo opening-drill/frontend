@@ -171,7 +171,7 @@ export const OpenCameraButton: React.FC<OpenCameraButtonProps> = ({
     const { location } = useDeviceLocation();
     const [isOpen, setIsOpen] = useState(false);
     const [stream, setStream] = useState<MediaStream | null>(null);
-    const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
+    const [facingMode] = useState<'user' | 'environment'>('environment');
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
     // States for the captured image (passed to photoDialog)

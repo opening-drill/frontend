@@ -1,13 +1,16 @@
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import LogoutIcon from '@mui/icons-material/Logout';
 import { Box, Typography, IconButton, Badge } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import React from 'react';
 import { makeStyles } from 'tss-react/mui';
 import { useDeviceLocation } from '../../../core/store/atoms/locationAtom';
-import { useMap } from '../../map/MapProvider';
 import { useChiefToast } from '../context/ChiefToastContext';
+import { useSetAtom } from 'jotai';
+import { logoutAtom } from '../../../core/store/authAtom';
 
 const useStyles = makeStyles()((theme) => ({
   topBarContainer: {
@@ -20,10 +23,8 @@ const useStyles = makeStyles()((theme) => ({
     alignItems: 'center',
     justifyContent: 'center',
     gap: theme.spacing(2),
-    width: '90vw',
+    width: '95vw',
     maxWidth: '600px',
-    // Using ltr so the first element is on the left and last is on the right
-    direction: 'ltr',
   },
   circle: {
     background: alpha(theme.palette.background.paper, 0.85),
@@ -56,10 +57,13 @@ const useStyles = makeStyles()((theme) => ({
     color: theme.palette.text.primary,
     direction: 'rtl',
     gap: theme.spacing(2),
+    minWidth: 0, // Allow flex shrinking
     [theme.breakpoints.down('sm')]: {
       padding: theme.spacing(1, 2),
       '& .MuiTypography-root': {
-        fontSize: '1.1rem',
+        fontSize: '0.9rem', // Smaller text on mobile
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
       }
     },
   },
@@ -73,23 +77,15 @@ const useStyles = makeStyles()((theme) => ({
 
 export const TopBar: React.FC = () => {
   const { classes } = useStyles();
-  const { location, refreshLocation } = useDeviceLocation();
-  const { goToLocation } = useMap();
+  const { location } = useDeviceLocation();
   const { notifications, setIsNotificationCenterOpen } = useChiefToast();
-  
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const logout = useSetAtom(logoutAtom);
 
-  const handleRecenter = () => {
-    if (location.error) {
-      refreshLocation();
-    } else if (location.longitude && location.latitude) {
-      goToLocation([location.longitude, location.latitude]);
-    }
-  };
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <Box className={classes.topBarContainer}>
-      <IconButton 
+      <IconButton
         className={classes.circle}
         onClick={() => setIsNotificationCenterOpen(true)}
       >
@@ -99,7 +95,7 @@ export const TopBar: React.FC = () => {
       </IconButton>
 
       <Box className={classes.pill}>
-        <LocationOnIcon color="primary" fontSize="large" />
+        <LocationOnIcon color="primary" fontSize="large" sx={{ flexShrink: 0 }} />
         {location.loading ? (
           <Typography variant="h5" className={classes.loading}>מאתר מיקום...</Typography>
         ) : location.error ? (
@@ -111,11 +107,11 @@ export const TopBar: React.FC = () => {
         )}
       </Box>
 
-      <IconButton 
+      <IconButton
         className={classes.circle}
-        onClick={handleRecenter}
+        onClick={() => logout()}
       >
-        <MyLocationIcon />
+        <LogoutIcon sx={{ transform: 'scaleX(-1)' }} />
       </IconButton>
     </Box>
   );
