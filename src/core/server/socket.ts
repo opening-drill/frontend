@@ -29,7 +29,7 @@ export interface ClientToServerEvents {
 export type LiveSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
 const getSocketBaseUrl = (): string => {
-  return import.meta.env.VITE_SOCKET_URL ?? '';
+  return 'https://live-data-1015949672422.europe-west1.run.app'
 };
 
 export const socket: LiveSocket = io(`${getSocketBaseUrl()}${LIVE_NAMESPACE}`, {
