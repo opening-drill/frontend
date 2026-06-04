@@ -5,33 +5,38 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
 import CrosshairIcon from "@mui/icons-material/MyLocation";
 import PentagonIcon from "@mui/icons-material/Pentagon";
+import { defaults as defaultInteractions, Draw } from "ol/interaction";
 import PlaceIcon from "@mui/icons-material/Place";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import TimelineIcon from "@mui/icons-material/Timeline";
 import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useSetAtom } from "jotai";
 import Feature from "ol/Feature";
 import Map from "ol/Map";
 import View from "ol/View";
-import { default as Point, default as PointGeometry } from "ol/geom/Point";
-import Draw from "ol/interaction/Draw";
+import Point from "ol/geom/Point";
 import TileLayer from "ol/layer/Tile";
 import VectorLayer from "ol/layer/Vector";
 import "ol/ol.css";
 import { fromLonLat, toLonLat } from "ol/proj";
 import { XYZ } from "ol/source";
 import VectorSource from "ol/source/Vector";
+import { useAtomValue } from "jotai"; // Assuming Jotai is used based on your code
+
+// Adjust these relative imports according to your actual folder structure
+import type { Drone } from "../../base-ops/BaseOpsApp";
+import droneIcon from "../utils/drone.png";
 import { Circle as CircleStyle, Fill, Icon, Stroke, Style } from "ol/style";
 import Text from "ol/style/Text";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 import { useDeviceLocation } from "../../../core/store/atoms/locationAtom";
 import { lastMapInteractionAtom } from "../../../core/store/atoms/mapInteractionAtom";
-import { aircraftsAtom } from "../../../store/aircraftAtoms";
-import type { AircraftLive } from "../../../types/aircraft";
 import { useMap } from "../MapProvider";
 import "../index.css";
 import { LOCATIONS } from "../utils/mapUtils";
+import type { AircraftLive } from "../../../types/aircraft";
+import { aircraftsAtom } from "../../../store/aircraftAtoms";
 
 const useStyles = makeStyles()((theme) => ({
   mapContainer: {
@@ -48,14 +53,14 @@ const useStyles = makeStyles()((theme) => ({
   },
   drawingToolbar: {
     position: "absolute",
-    bottom: 80, 
+    bottom: 80,
     right: 16,
     zIndex: 1000,
     display: "flex",
     flexDirection: "column",
     gap: theme.spacing(1.5),
     padding: theme.spacing(1.5),
-    background: "rgba(18, 24, 38, 0.85)", 
+    background: "rgba(18, 24, 38, 0.85)",
     backdropFilter: "blur(16px)",
     borderRadius: Number(theme.shape.borderRadius) * 1.5,
     border: "1px solid rgba(255, 255, 255, 0.08)",
@@ -67,18 +72,18 @@ const useStyles = makeStyles()((theme) => ({
     flexDirection: "column",
     gap: theme.spacing(1),
     padding: theme.spacing(1.5),
-    background: "rgba(20, 20, 25, 0.98)", 
+    background: "rgba(20, 20, 25, 0.98)",
     backdropFilter: "blur(16px)",
     borderRadius: "12px",
     border: "1px solid rgba(255, 61, 0, 0.5)",
     boxShadow: "0 10px 40px 0 rgba(0, 0, 0, 0.6)",
     width: 200,
     color: "#fff",
-    position: "absolute", 
+    position: "absolute",
     zIndex: 2000,
-    transform: "translate(-50%, -100%)", 
+    transform: "translate(-50%, -100%)",
     pointerEvents: "auto",
-    "&::after": { 
+    "&::after": {
       content: '""',
       position: "absolute",
       bottom: "-8px",
@@ -87,7 +92,7 @@ const useStyles = makeStyles()((theme) => ({
       borderWidth: "8px 8px 0",
       borderStyle: "solid",
       borderColor: "rgba(20, 20, 25, 0.98) transparent transparent",
-    }
+    },
   },
   toolbarHeader: {
     display: "flex",
@@ -233,15 +238,19 @@ const useStyles = makeStyles()((theme) => ({
   coordContainer: {
     display: "flex",
     flexDirection: "column",
-    alignItems: "center", 
+    alignItems: "center",
     justifyContent: "center",
     background: "rgba(255,255,255,0.05)",
     padding: "8px",
     borderRadius: "8px",
     margin: "4px 0",
     border: "1px solid rgba(255,255,255,0.1)",
-  }
+  },
 }));
+
+type MapProps = {
+  drones?: Drone[];
+};
 
 type DrawType = "Polygon" | "LineString" | "Point" | "Circle";
 
@@ -262,8 +271,10 @@ const getFeatureStyle = (color: string, isAttack = false) => {
   if (isAttack) {
     return new Style({
       image: new Icon({
-        src: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(targetIconSvg)}`,
-        anchor: [0.5, 0.5], 
+        src: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
+          targetIconSvg
+        )}`,
+        anchor: [0.5, 0.5],
         scale: 1,
       }),
     });
@@ -281,22 +292,20 @@ const getFeatureStyle = (color: string, isAttack = false) => {
 };
 
 const getAircraftStyle = (aircraft: AircraftLive): Style => {
-  let color = '#10b981'; // free (emerald/teal)
-  if (aircraft.status === 'busy') {
-    color = '#f59e0b'; // busy (amber/orange)
-  } else if (aircraft.status === 'broken') {
-    color = '#ef4444'; // broken (coral/red)
+  let color = "#10b981"; // free
+  if (aircraft.status === "busy") {
+    color = "#f59e0b"; // busy
+  } else if (aircraft.status === "broken") {
+    color = "#ef4444"; // broken
   }
 
-  // Sleek military/tactical UAV/drone SVG icon pointing North (0 degrees)
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" fill="none">
       <circle cx="18" cy="18" r="15" stroke="${color}" stroke-opacity="0.3" stroke-width="1.5" fill="${color}" fill-opacity="0.1"/>
       <path d="M18 6 L12 28 L18 23 L24 28 Z" fill="${color}" stroke="#1e293b" stroke-width="1.5" stroke-linejoin="round"/>
       <path d="M18 6 L18 13" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-      `;
-      
+    </svg>`;
+
   const svgDataUri = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
   const rotationRad = (aircraft.heading_degrees * Math.PI) / 180;
 
@@ -309,74 +318,91 @@ const getAircraftStyle = (aircraft: AircraftLive): Style => {
     }),
     text: new Text({
       text: `${aircraft.aircraft_type}\n(${aircraft.altitude}m | ${aircraft.horizontal_speed_mps}m/s)`,
-      font: 'bold 11px Inter, Roboto, Helvetica Neue, sans-serif',
-      fill: new Fill({
-        color: '#ffffff',
-      }),
-      stroke: new Stroke({
-        color: 'rgba(18, 24, 38, 0.85)',
-        width: 3.5,
-      }),
+      font: "bold 11px Inter, Roboto, Helvetica Neue, sans-serif",
+      fill: new Fill({ color: "#ffffff" }),
+      stroke: new Stroke({ color: "rgba(18, 24, 38, 0.85)", width: 3.5 }),
       offsetY: 28,
     }),
-    });
-    };
-      
-      
-const GenericMap = () => {
+  });
+};
+
+const GenericMap = ({ drones = [] }: MapProps) => {
   const { classes } = useStyles();
-  const { mapRef } = useMap();
   const { location } = useDeviceLocation();
   const setLastInteraction = useSetAtom(lastMapInteractionAtom);
+  const { mapRef, setCoords } = useMap();
   const mapElement = useRef<HTMLDivElement>(null);
-  
-  // Keep track of the aircraft vector source
+
+  // Source refs
   const aircraftSourceRef = useRef<VectorSource | null>(null);
   const deviceSourceRef = useRef<VectorSource | null>(null);
+  const droneSourceRef = useRef<VectorSource | null>(null);
   const drawingSourceRef = useRef<VectorSource | null>(null);
+
   const drawingLayerRef = useRef<VectorLayer<VectorSource> | null>(null);
   const drawInteractionRef = useRef<Draw | null>(null);
-  
+
+  // State
   const [activeTool, setActiveTool] = useState<DrawType | null>(null);
-  const [activeColor, setActiveColor] = useState<string>("#00e5ff"); 
-  const [isToolbarOpen, setIsToolbarOpen] = useState<boolean>(false); 
+  const [activeColor, setActiveColor] = useState<string>("#00e5ff");
+  const [isToolbarOpen, setIsToolbarOpen] = useState<boolean>(false);
   const [isAttackModeActive, setIsAttackModeActive] = useState<boolean>(false);
-  
-  const [attackCoords, setAttackCoords] = useState<{ lat: string; lon: string } | null>(null);
-  const [selectedAttackFeature, setSelectedAttackFeature] = useState<Feature | null>(null);
-  
-  // Use references for state values needed inside map event triggers to avoid re-renders rebuilding the map pipeline
+  const [attackCoords, setAttackCoords] = useState<{
+    lat: string;
+    lon: string;
+  } | null>(null);
+  const [selectedAttackFeature, setSelectedAttackFeature] =
+    useState<Feature | null>(null);
+
+  // Map sync refs
   const geoCoordsRef = useRef<number[] | null>(null);
-  const [popupPixelPos, setPopupPixelPos] = useState<{ x: number; y: number } | null>(null);
-  
-  const displayPopupAtCoordinates = (coordinates: number[], feature: Feature) => {
-    const lonLat = toLonLat(coordinates);
-    setSelectedAttackFeature(feature);
-    setAttackCoords({
-      lon: lonLat[0].toFixed(5),
-      lat: lonLat[1].toFixed(5),
-    });
-    
-    geoCoordsRef.current = coordinates;
-    
-    // Position popup instantly upon target generation
-    if (mapRef.current) {
-      const pixel = mapRef.current.getPixelFromCoordinate(coordinates);
-      if (pixel) setPopupPixelPos({ x: pixel[0], y: pixel[1] - 12 });
-    }
-  };
+  const [popupPixelPos, setPopupPixelPos] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
 
-  // ONE-TIME SETUP: Initialized strictly once. Array dependencies left completely empty.
+  const displayPopupAtCoordinates = useCallback(
+    (coordinates: number[], feature: Feature) => {
+      const lonLat = toLonLat(coordinates);
+      setSelectedAttackFeature(feature);
+      setAttackCoords({
+        lon: lonLat[0].toFixed(5),
+        lat: lonLat[1].toFixed(5),
+      });
+
+      geoCoordsRef.current = coordinates;
+
+      if (mapRef.current) {
+        const pixel = mapRef.current.getPixelFromCoordinate(coordinates);
+        if (pixel) {
+          setPopupPixelPos((prev) => {
+            const next = { x: pixel[0], y: pixel[1] - 12 };
+            return prev && prev.x === next.x && prev.y === next.y ? prev : next;
+          });
+        }
+      }
+    },
+    [mapRef],
+  );
+
   useEffect(() => {
-    if (!mapElement.current) return;
+    if (!mapElement.current || mapRef.current) return;
 
-    // Set up aircraft tracking layer
+    // 1. Setup Sources
     const aircraftSource = new VectorSource();
+    const droneSource = new VectorSource({ features: [] });
+    const drawingVSource = new VectorSource({ wrapX: false });
+
+    aircraftSourceRef.current = aircraftSource;
+    droneSourceRef.current = droneSource;
+    drawingSourceRef.current = drawingVSource;
+
+    // 2. Setup Layers
     const aircraftLayer = new VectorLayer({
       source: aircraftSource,
-      zIndex: 100, // Display above base tile layer
+      zIndex: 100,
     });
-    aircraftSourceRef.current = aircraftSource;
+    const droneLayer = new VectorLayer({ source: droneSource, zIndex: 90 });
 
     // Set up device tracking layer
     const deviceSource = new VectorSource();
@@ -390,18 +416,22 @@ const GenericMap = () => {
     const drawingSource = new VectorSource({ wrapX: false });
     const drawingLayer = new VectorLayer({
       source: drawingSource,
+      zIndex: 110,
       style: (feature) => {
         const color = feature.get("color") || "#00e5ff";
         const isAttack = feature.get("isAttack") || false;
         return getFeatureStyle(color, isAttack);
       },
     });
-
-    drawingSourceRef.current = drawingSource;
     drawingLayerRef.current = drawingLayer;
 
+    // 3. Initialize Map Instance
     const mapInstance = new Map({
       target: mapElement.current,
+      interactions: defaultInteractions({
+        altShiftDragRotate: false,
+        pinchRotate: false,
+      }),
       layers: [
         new TileLayer({
           source: new XYZ({
@@ -409,61 +439,114 @@ const GenericMap = () => {
             maxZoom: 20,
           }),
         }),
-        drawingLayer,
+        drawingLayer, // Drawings go underneath popups but above other vectors
+        droneLayer,
         aircraftLayer,
         deviceLayer,
       ],
       view: new View({
         center: fromLonLat(LOCATIONS.gaza.coords),
         zoom: 12,
+        maxZoom: 22,
         constrainRotation: false,
       }),
       controls: []
     });
 
-    // Helper functions to safely update screen location on view shifts
+    // 4. Setup Event Listeners
     const syncPixelPosition = () => {
       if (geoCoordsRef.current) {
         const pixel = mapInstance.getPixelFromCoordinate(geoCoordsRef.current);
-        if (pixel) setPopupPixelPos({ x: pixel[0], y: pixel[1] - 12 });
+        if (pixel) {
+          setPopupPixelPos((prev) => {
+            const next = { x: pixel[0], y: pixel[1] - 12 };
+            return prev && prev.x === next.x && prev.y === next.y ? prev : next;
+          });
+        }
       }
     };
 
-    mapInstance.on("moveend", syncPixelPosition);
+    mapInstance.on("moveend", () => {
+      const view = mapInstance.getView();
+      const center = view.getCenter();
+      if (center) {
+        const lonLatCoords = toLonLat(center);
+        setCoords(lonLatCoords);
+      }
+      syncPixelPosition();
+    });
+
     mapInstance.on("postrender", syncPixelPosition);
 
     mapInstance.on("click", (evt) => {
-      // Don't register selection hits if user is in an active drawing operation
-      if (drawInteractionRef.current) return; 
+      if (drawInteractionRef.current) return;
 
-      const feature = mapInstance.forEachFeatureAtPixel(evt.pixel, (feat) => feat, { hitTolerance: 8 });
-      
+      const feature = mapInstance.forEachFeatureAtPixel(
+        evt.pixel,
+        (feat) => feat,
+        { hitTolerance: 8 }
+      );
+
       if (feature && feature.get("isAttack")) {
         const geom = feature.getGeometry();
         if (geom && geom.getType() === "Point") {
-          const pointGeom = geom as PointGeometry;
-          displayPopupAtCoordinates(pointGeom.getCoordinates(), feature as Feature);
+          // Fixed point geometry type casting
+          const pointGeom = geom as Point;
+          displayPopupAtCoordinates(
+            pointGeom.getCoordinates(),
+            feature as Feature
+          );
         }
       } else {
-        // Safe clear function call
         setAttackCoords(null);
         geoCoordsRef.current = null;
         setPopupPixelPos(null);
       }
     });
 
+    // 5. Store globally
     mapRef.current = mapInstance;
 
+    // Cleanup
     return () => {
       if (mapRef.current) {
         mapRef.current.setTarget(undefined);
         mapRef.current = null;
       }
       aircraftSourceRef.current = null;
+      droneSourceRef.current = null;
+      drawingSourceRef.current = null;
     };
-  }, []);
+  }, [displayPopupAtCoordinates, mapRef, setCoords]);
 
-  // INTERACTION LIFECYCLE: Controls appending/destroying drawing tools
+  // Sync Drones
+  useEffect(() => {
+    if (droneSourceRef.current) {
+      droneSourceRef.current.clear();
+
+      const newFeatures = drones.map((drone) => {
+        const feature = new Feature({
+          geometry: new Point(fromLonLat(drone.coords)),
+          name: drone.name,
+        });
+
+        feature.setStyle(
+          new Style({
+            image: new Icon({
+              src: droneIcon,
+              scale: 0.08,
+              anchor: [0.5, 0.5],
+            }),
+          })
+        );
+        return feature;
+      });
+
+      droneSourceRef.current.addFeatures(newFeatures);
+    }
+  }, [drones]);
+
+  // Interaction Lifecycle
   useEffect(() => {
     const map = mapRef.current;
     const source = drawingSourceRef.current;
@@ -476,7 +559,7 @@ const GenericMap = () => {
     }
 
     if (isAttackModeActive) {
-      setIsToolbarOpen(false); 
+      setIsToolbarOpen(false);
 
       const attackDraw = new Draw({
         source: source,
@@ -487,9 +570,9 @@ const GenericMap = () => {
       attackDraw.on("drawend", (event) => {
         const geometry = event.feature.getGeometry();
         if (geometry && geometry.getType() === "Point") {
-          const coordinates = (geometry as PointGeometry).getCoordinates();
+          const coordinates = (geometry as Point).getCoordinates();
           event.feature.set("isAttack", true);
-          
+
           displayPopupAtCoordinates(coordinates, event.feature);
           setIsAttackModeActive(false);
         }
@@ -497,8 +580,7 @@ const GenericMap = () => {
 
       map.addInteraction(attackDraw);
       drawInteractionRef.current = attackDraw;
-    } 
-    else if (activeTool && isToolbarOpen) {
+    } else if (activeTool && isToolbarOpen) {
       const draw = new Draw({
         source: source,
         type: activeTool,
@@ -519,7 +601,14 @@ const GenericMap = () => {
         drawInteractionRef.current = null;
       }
     };
-  }, [activeTool, activeColor, isToolbarOpen, isAttackModeActive]);
+  }, [
+    activeTool,
+    activeColor,
+    isToolbarOpen,
+    isAttackModeActive,
+    mapRef,
+    displayPopupAtCoordinates,
+  ]);
 
   const handleClear = () => {
     if (drawingSourceRef.current) {
@@ -545,23 +634,40 @@ const GenericMap = () => {
 
   const handleAttackConfirm = () => {
     if (attackCoords) {
-      alert(`מבצע תקיפה לקואורדינטות: ${attackCoords.lat}, ${attackCoords.lon}`);
+      // Attack confirmation should be handled in-app without browser-native dialogs.
+      handleClosePopupOnly();
     }
   };
 
   const tools = [
-    { type: "Polygon" as DrawType, label: "פוליגון", icon: <PentagonIcon fontSize="small" /> },
-    { type: "LineString" as DrawType, label: "קו", icon: <TimelineIcon fontSize="small" /> },
-    { type: "Point" as DrawType, label: "נקודה", icon: <PlaceIcon fontSize="small" /> },
-    { type: "Circle" as DrawType, label: "מעגל", icon: <RadioButtonUncheckedIcon fontSize="small" /> },
+    {
+      type: "Polygon" as DrawType,
+      label: "פוליגון",
+      icon: <PentagonIcon fontSize="small" />,
+    },
+    {
+      type: "LineString" as DrawType,
+      label: "קו",
+      icon: <TimelineIcon fontSize="small" />,
+    },
+    {
+      type: "Point" as DrawType,
+      label: "נקודה",
+      icon: <PlaceIcon fontSize="small" />,
+    },
+    {
+      type: "Circle" as DrawType,
+      label: "מעגל",
+      icon: <RadioButtonUncheckedIcon fontSize="small" />,
+    },
   ];
 
-  // Synchronize aircraft state from Jotai with OpenLayers features
+  // Sync Aircrafts
   const aircrafts = useAtomValue(aircraftsAtom);
 
   useEffect(() => {
     const source = aircraftSourceRef.current;
-    if (!source) return;
+    if (!source || !aircrafts) return;
 
     const existingFeatures = source.getFeatures();
     const existingMap: Record<string, Feature> = {};
@@ -574,16 +680,15 @@ const GenericMap = () => {
 
     const activeIds = new Set(Object.keys(aircrafts));
 
-    // 1. Remove features for aircrafts that are no longer active
+    // 1. Remove obsolete features
     Object.keys(existingMap).forEach((id) => {
       if (!activeIds.has(id)) {
         source.removeFeature(existingMap[id]);
       }
     });
 
-    // 2. Add or update features for active aircrafts
+    // 2. Add or update active features
     Object.values(aircrafts).forEach((aircraft) => {
-      // Coordinate validity guardrail
       if (
         !aircraft.location ||
         typeof aircraft.location.lng !== "number" ||
@@ -598,16 +703,11 @@ const GenericMap = () => {
       const coords = fromLonLat([aircraft.location.lng, aircraft.location.lat]);
 
       if (feature) {
-        // Update geometry in-place
         const geom = feature.getGeometry() as Point;
-        if (geom) {
-          geom.setCoordinates(coords);
-        }
-        // Update properties, styles, and orientation
+        if (geom) geom.setCoordinates(coords);
         feature.setProperties(aircraft);
         feature.setStyle(getAircraftStyle(aircraft));
       } else {
-        // Create a new feature for the new aircraft
         const newFeature = new Feature({
           geometry: new Point(coords),
         });
@@ -633,7 +733,7 @@ const GenericMap = () => {
 
     // We consider heading valid if it's a number and we also have speed, or we just trust the heading.
     const hasHeading = location.heading !== null && location.heading !== undefined;
-    
+
     // SVG for stationary (dot with accuracy circle)
     const stationarySvg = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
       <circle cx="32" cy="32" r="24" fill="#4285F4" fill-opacity="0.25" />
@@ -672,7 +772,7 @@ const GenericMap = () => {
   const handleInteraction = () => setLastInteraction(Date.now());
 
   return (
-    <Box 
+    <Box
       className={classes.mapContainer}
       onPointerDown={handleInteraction}
       onTouchStart={handleInteraction}
@@ -680,51 +780,84 @@ const GenericMap = () => {
     >
       <div ref={mapElement} className={classes.mapTarget} />
 
-      <Tooltip title={isAttackModeActive ? "בטל בחירת מטרה" : "סמן נקודת תקיפה"} arrow placement="left">
-        <IconButton 
+      <Tooltip
+        title={isAttackModeActive ? "בטל בחירת מטרה" : "סמן נקודת תקיפה"}
+        arrow
+        placement="left"
+      >
+        <IconButton
           className={classes.attackModeButton}
           onClick={() => setIsAttackModeActive(!isAttackModeActive)}
-          style={isAttackModeActive ? { background: '#ff3d00', color: '#fff' } : {}}
+          style={
+            isAttackModeActive ? { background: "#ff3d00", color: "#fff" } : {}
+          }
         >
           <LocalFireDepartmentIcon />
         </IconButton>
       </Tooltip>
 
-      <Tooltip title={isToolbarOpen ? "סגור כלי ציור" : "כלי ציור במפה"} arrow placement="left">
-        <IconButton 
-          className={classes.toggleButton} 
+      <Tooltip
+        title={isToolbarOpen ? "סגור כלי ציור" : "כלי ציור במפה"}
+        arrow
+        placement="left"
+      >
+        <IconButton
+          className={classes.toggleButton}
           onClick={() => setIsToolbarOpen(!isToolbarOpen)}
-          style={isToolbarOpen ? { background: '#00e5ff', color: '#121826' } : {}}
+          style={
+            isToolbarOpen ? { background: "#00e5ff", color: "#121826" } : {}
+          }
         >
           {isToolbarOpen ? <CloseIcon /> : <CreateIcon />}
         </IconButton>
       </Tooltip>
 
-      {/* PURE REACT CONDITIONAL POPUP */}
       {attackCoords && popupPixelPos && (
-        <div 
-          className={classes.attackPopupOverlay} 
+        <div
+          className={classes.attackPopupOverlay}
           dir="rtl"
-          style={{ 
-            left: `${popupPixelPos.x}px`, 
-            top: `${popupPixelPos.y}px` 
+          style={{
+            left: `${popupPixelPos.x}px`,
+            top: `${popupPixelPos.y}px`,
           }}
         >
           <Box className={classes.toolbarHeader}>
-            <Typography variant="subtitle2" className={classes.toolbarTitle} style={{ color: "#ff8a80" }}>
+            <Typography
+              variant="subtitle2"
+              className={classes.toolbarTitle}
+              style={{ color: "#ff8a80" }}
+            >
               <CrosshairIcon sx={{ fontSize: 14 }} />
               יעד תקיפה
             </Typography>
-            <IconButton className={classes.closeButton} size="small" onClick={handleClosePopupOnly}>
+            <IconButton
+              className={classes.closeButton}
+              size="small"
+              onClick={handleClosePopupOnly}
+            >
               <CloseIcon sx={{ fontSize: 14 }} />
             </IconButton>
           </Box>
-          
+
           <Box className={classes.coordContainer}>
-            <Typography variant="body2" sx={{ fontFamily: "monospace", fontSize: "0.8rem", color: "#00e5ff" }}>
+            <Typography
+              variant="body2"
+              sx={{
+                fontFamily: "monospace",
+                fontSize: "0.8rem",
+                color: "#00e5ff",
+              }}
+            >
               LAT: {attackCoords.lat}
             </Typography>
-            <Typography variant="body2" sx={{ fontFamily: "monospace", fontSize: "0.8rem", color: "#00e5ff" }}>
+            <Typography
+              variant="body2"
+              sx={{
+                fontFamily: "monospace",
+                fontSize: "0.8rem",
+                color: "#00e5ff",
+              }}
+            >
               LON: {attackCoords.lon}
             </Typography>
           </Box>
@@ -742,7 +875,13 @@ const GenericMap = () => {
           <Button
             variant="text"
             size="small"
-            sx={{ color: "rgba(255,255,255,0.4)", mt: 0.5, textTransform: "none", fontSize: "0.7rem", "&:hover": { color: "#ff3d00" }}}
+            sx={{
+              color: "rgba(255,255,255,0.4)",
+              mt: 0.5,
+              textTransform: "none",
+              fontSize: "0.7rem",
+              "&:hover": { color: "#ff3d00" },
+            }}
             onClick={handleRemoveAttackPoint}
             fullWidth
           >
@@ -758,18 +897,37 @@ const GenericMap = () => {
               <BrushIcon sx={{ fontSize: 16 }} />
               כלי ציור במפה
             </Typography>
-            <IconButton className={classes.closeButton} size="small" onClick={() => setIsToolbarOpen(false)}>
+            <IconButton
+              className={classes.closeButton}
+              size="small"
+              onClick={() => setIsToolbarOpen(false)}
+            >
               <CloseIcon sx={{ fontSize: 16 }} />
             </IconButton>
           </Box>
 
           <Box className={classes.toolGrid}>
             {tools.map((tool) => (
-              <Tooltip key={tool.type} title={`${tool.label}`} arrow placement="top">
+              <Tooltip
+                key={tool.type}
+                title={`${tool.label}`}
+                arrow
+                placement="top"
+              >
                 <IconButton
                   className={classes.toolButton}
-                  style={activeTool === tool.type ? { background: hexToRgba(activeColor, 0.15), border: `1px solid ${activeColor}`, color: activeColor } : {}}
-                  onClick={() => setActiveTool(activeTool === tool.type ? null : tool.type)}
+                  style={
+                    activeTool === tool.type
+                      ? {
+                        background: hexToRgba(activeColor, 0.15),
+                        border: `1px solid ${activeColor}`,
+                        color: activeColor,
+                      }
+                      : {}
+                  }
+                  onClick={() =>
+                    setActiveTool(activeTool === tool.type ? null : tool.type)
+                  }
                 >
                   {tool.icon}
                 </IconButton>
@@ -788,7 +946,8 @@ const GenericMap = () => {
               ].map((color) => (
                 <Box
                   key={color.hex}
-                  className={`${classes.colorDot} ${activeColor === color.hex ? classes.activeColorDot : ""}`}
+                  className={`${classes.colorDot} ${activeColor === color.hex ? classes.activeColorDot : ""
+                    }`}
                   style={{ backgroundColor: color.hex }}
                   onClick={() => setActiveColor(color.hex)}
                 />

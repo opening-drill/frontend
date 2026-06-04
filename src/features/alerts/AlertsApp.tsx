@@ -8,6 +8,8 @@ import { approveAttackRequest } from '../../core/server/api/approveAttackRequest
 import { AircraftTable } from './components/aircraft-table/AircraftTable';
 import GenericMap from '../map/components/GenericMap';
 import type { AlertData, RecommendationPush } from '../../types/alertTypes';
+import { useHamelSocket } from '../../hooks/useHamelSocket';
+import { useAircraftSocket } from '../../hooks/useAircraftSocket';
 
 
 const useStyles = makeStyles()((theme) => ({
@@ -125,6 +127,8 @@ export const AlertsApp: React.FC = () => {
   const [isAircraftTableOpen, setIsAircraftTableOpen] = useState(false)
   const [openConfirm, setOpenConfirm] = React.useState(false);
   const [selectedAlert, setSelectedAlert] = React.useState<AlertData | null>(null);
+  useHamelSocket();
+  useAircraftSocket();
 
   return (
     <Box className={classes.root}>
