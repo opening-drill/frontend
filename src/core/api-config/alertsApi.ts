@@ -4,13 +4,12 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from 'axios';
 
-const TOKEN_STORAGE_KEY = 'token';
+const TOKEN_STORAGE_KEY = 'auth-token';
 const LOGIN_PATH = '/login';
 // ToDo(): after we have full link we need to work with proxy by vite and fix this code.
 const getApiBaseUrl = (): string => {
   return  '/alerts-api';
 };
-
 const redirectToLogin = (): void => {
   if (window.location.pathname !== LOGIN_PATH) {
     window.location.assign(LOGIN_PATH);

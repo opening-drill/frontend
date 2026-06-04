@@ -7,10 +7,10 @@ import {
 } from "@mui/material";
 import FlightIcon from "@mui/icons-material/Flight";
 import config from './AircraftTable.config';
-import { getAirCraftStatus } from "../../../../core/server/api/getAircraftStatus";
 import Loader from "../general/Loader";
 import type { aircraftRowType, aircraftType } from "./AircraftTable.type";
 import type { AlertData } from "../../../../types/alertTypes";
+import { getAirCraftStatus } from "../../../../core/server/api/getAircraftSatus";
 
 type Aircraft = {
   id: string,
@@ -65,7 +65,7 @@ export const  AircraftTable = ({setIsAircraftTableOpen, handleAccept, alert} :{ 
   fetchAircraft();
 }, []);
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
-  const [selectedAircraft, setSelectedAircraft] = useState<Aircraft | null>(null);
+  const [selectedAircraft, setSelectedAircraft] = useState<aircraftRowType | null>(null);
 
   const handleLaunch = (alert: AlertData) => {
     setIsAircraftTableOpen(false);
