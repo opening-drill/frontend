@@ -19,18 +19,18 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
 
   const goToLocation = (
     coords: number[],
-    zoom: number = 19.5,
-    heading?: number
+    zoom?: number,
+    _heading?: number // Kept for signature compatibility, but ignored for map rotation
   ) => {    
     if (mapRef.current) {
-      const rotationInRadians = heading ? heading * (Math.PI / 180) : 0;
-
-      mapRef.current.getView().animate({
+      const options: any = {
         center: fromLonLat(coords),
-        zoom: zoom,
-        duration: 2000,
-        rotation: rotationInRadians,
-      });      
+        duration: 1000,
+      };
+      if (zoom !== undefined) {
+        options.zoom = zoom;
+      }
+      mapRef.current.getView().animate(options);      
     }
 
   };

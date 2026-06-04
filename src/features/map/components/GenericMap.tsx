@@ -9,7 +9,7 @@ import PlaceIcon from "@mui/icons-material/Place";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import TimelineIcon from "@mui/icons-material/Timeline";
 import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
-import { useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import Feature from "ol/Feature";
 import Map from "ol/Map";
 import View from "ol/View";
@@ -25,6 +25,8 @@ import { Circle as CircleStyle, Fill, Icon, Stroke, Style } from "ol/style";
 import Text from "ol/style/Text";
 import { useEffect, useRef, useState } from "react";
 import { makeStyles } from "tss-react/mui";
+import { useDeviceLocation } from "../../../core/store/atoms/locationAtom";
+import { lastMapInteractionAtom } from "../../../core/store/atoms/mapInteractionAtom";
 import { aircraftsAtom } from "../../../store/aircraftAtoms";
 import type { AircraftLive } from "../../../types/aircraft";
 import { useMap } from "../MapProvider";
@@ -301,7 +303,7 @@ const getAircraftStyle = (aircraft: AircraftLive): Style => {
   return new Style({
     image: new Icon({
       src: svgDataUri,
-      scale: 1.0,
+      scale: 1.4,
       rotation: rotationRad,
       anchor: [0.5, 0.5],
     }),
@@ -324,10 +326,13 @@ const getAircraftStyle = (aircraft: AircraftLive): Style => {
 const GenericMap = () => {
   const { classes } = useStyles();
   const { mapRef } = useMap();
+  const { location } = useDeviceLocation();
+  const setLastInteraction = useSetAtom(lastMapInteractionAtom);
   const mapElement = useRef<HTMLDivElement>(null);
   
   // Keep track of the aircraft vector source
   const aircraftSourceRef = useRef<VectorSource | null>(null);
+  const deviceSourceRef = useRef<VectorSource | null>(null);
   const drawingSourceRef = useRef<VectorSource | null>(null);
   const drawingLayerRef = useRef<VectorLayer<VectorSource> | null>(null);
   const drawInteractionRef = useRef<Draw | null>(null);
@@ -373,6 +378,14 @@ const GenericMap = () => {
     });
     aircraftSourceRef.current = aircraftSource;
 
+    // Set up device tracking layer
+    const deviceSource = new VectorSource();
+    const deviceLayer = new VectorLayer({
+      source: deviceSource,
+      zIndex: 101, // Display above aircrafts
+    });
+    deviceSourceRef.current = deviceSource;
+
     // Set up drawing/attack layer
     const drawingSource = new VectorSource({ wrapX: false });
     const drawingLayer = new VectorLayer({
@@ -398,6 +411,7 @@ const GenericMap = () => {
         }),
         drawingLayer,
         aircraftLayer,
+        deviceLayer,
       ],
       view: new View({
         center: fromLonLat(LOCATIONS.gaza.coords),
@@ -605,8 +619,65 @@ const GenericMap = () => {
     });
   }, [aircrafts]);
 
+  // Synchronize device location with OpenLayers feature
+  useEffect(() => {
+    const source = deviceSourceRef.current;
+    if (!source || !location.latitude || !location.longitude) return;
+
+    source.clear();
+
+    const coords = fromLonLat([location.longitude, location.latitude]);
+    const feature = new Feature({
+      geometry: new Point(coords),
+    });
+
+    // We consider heading valid if it's a number and we also have speed, or we just trust the heading.
+    const hasHeading = location.heading !== null && location.heading !== undefined;
+    
+    // SVG for stationary (dot with accuracy circle)
+    const stationarySvg = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+      <circle cx="32" cy="32" r="24" fill="#4285F4" fill-opacity="0.25" />
+      <circle cx="32" cy="32" r="9" fill="#ffffff" />
+      <circle cx="32" cy="32" r="7" fill="#4285F4" />
+    </svg>`;
+
+    // SVG for moving (dot with a 60-degree cone pointing North/Up)
+    const movingSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+      <defs>
+        <radialGradient id="grad" cx="64" cy="64" r="64" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#4285F4" stop-opacity="0.45"/>
+          <stop offset="100%" stop-color="#4285F4" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <path d="M 64 64 L 32 8.6 A 64 64 0 0 1 96 8.6 Z" fill="url(#grad)" />
+      <circle cx="64" cy="64" r="10" fill="#ffffff" />
+      <circle cx="64" cy="64" r="8" fill="#4285F4" />
+    </svg>`;
+
+    const svg = hasHeading ? movingSvg : stationarySvg;
+    const rotation = hasHeading ? location.heading! * (Math.PI / 180) : 0;
+
+    feature.setStyle(new Style({
+      image: new Icon({
+        src: `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`,
+        scale: hasHeading ? 1.4 : 1.2,
+        rotation: rotation,
+        anchor: [0.5, 0.5],
+      })
+    }));
+
+    source.addFeature(feature);
+  }, [location.latitude, location.longitude, location.heading]);
+
+  const handleInteraction = () => setLastInteraction(Date.now());
+
   return (
-    <Box className={classes.mapContainer}>
+    <Box 
+      className={classes.mapContainer}
+      onPointerDown={handleInteraction}
+      onTouchStart={handleInteraction}
+      onWheel={handleInteraction}
+    >
       <div ref={mapElement} className={classes.mapTarget} />
 
       <Tooltip title={isAttackModeActive ? "בטל בחירת מטרה" : "סמן נקודת תקיפה"} arrow placement="left">
