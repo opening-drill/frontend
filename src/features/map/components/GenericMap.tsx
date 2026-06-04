@@ -24,11 +24,10 @@ import { useAtomValue } from "jotai"; // Assuming Jotai is used based on your co
 
 // Adjust these relative imports according to your actual folder structure
 import type { Drone } from "../../base-ops/BaseOpsApp";
-import "../index.css";
 import droneIcon from "../utils/drone.png";
 import { Circle as CircleStyle, Fill, Icon, Stroke, Style } from "ol/style";
 import Text from "ol/style/Text";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { makeStyles } from "tss-react/mui";
 import { useMap } from "../MapProvider";
 import "../index.css";
@@ -356,24 +355,29 @@ const GenericMap = ({ drones = [] }: MapProps) => {
     y: number;
   } | null>(null);
 
-  const displayPopupAtCoordinates = (
-    coordinates: number[],
-    feature: Feature
-  ) => {
-    const lonLat = toLonLat(coordinates);
-    setSelectedAttackFeature(feature);
-    setAttackCoords({
-      lon: lonLat[0].toFixed(5),
-      lat: lonLat[1].toFixed(5),
-    });
+  const displayPopupAtCoordinates = useCallback(
+    (coordinates: number[], feature: Feature) => {
+      const lonLat = toLonLat(coordinates);
+      setSelectedAttackFeature(feature);
+      setAttackCoords({
+        lon: lonLat[0].toFixed(5),
+        lat: lonLat[1].toFixed(5),
+      });
 
-    geoCoordsRef.current = coordinates;
+      geoCoordsRef.current = coordinates;
 
-    if (mapRef.current) {
-      const pixel = mapRef.current.getPixelFromCoordinate(coordinates);
-      if (pixel) setPopupPixelPos({ x: pixel[0], y: pixel[1] - 12 });
-    }
-  };
+      if (mapRef.current) {
+        const pixel = mapRef.current.getPixelFromCoordinate(coordinates);
+        if (pixel) {
+          setPopupPixelPos((prev) => {
+            const next = { x: pixel[0], y: pixel[1] - 12 };
+            return prev && prev.x === next.x && prev.y === next.y ? prev : next;
+          });
+        }
+      }
+    },
+    [mapRef],
+  );
 
   useEffect(() => {
     if (!mapElement.current || mapRef.current) return;
@@ -436,7 +440,12 @@ const GenericMap = ({ drones = [] }: MapProps) => {
     const syncPixelPosition = () => {
       if (geoCoordsRef.current) {
         const pixel = mapInstance.getPixelFromCoordinate(geoCoordsRef.current);
-        if (pixel) setPopupPixelPos({ x: pixel[0], y: pixel[1] - 12 });
+        if (pixel) {
+          setPopupPixelPos((prev) => {
+            const next = { x: pixel[0], y: pixel[1] - 12 };
+            return prev && prev.x === next.x && prev.y === next.y ? prev : next;
+          });
+        }
       }
     };
 

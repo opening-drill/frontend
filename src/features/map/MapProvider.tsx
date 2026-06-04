@@ -21,26 +21,30 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
   const mapRef = useRef<Map | null>(null);
   const [coords, setCoords] = useState<number[]>([34.4668, 31.5016]);
 
-  const goToLocation = (
-    coords: number[],
-    zoom: number = 19.5,
-    heading?: number
-  ) => {
-    if (mapRef.current) {
-      const center = fromLonLat(coords);
-      const rotation = heading !== undefined ? (heading * Math.PI) / 180 : undefined;
+  const goToLocation = React.useCallback(
+    (coords: number[], zoom: number = 19.5, heading?: number) => {
+      if (mapRef.current) {
+        const center = fromLonLat(coords);
+        const rotation = heading !== undefined ? (heading * Math.PI) / 180 : undefined;
 
-      mapRef.current.getView().animate({
-        center,
-        zoom,
-        duration: 2000,
-        rotation,
-      });
-    }
-  };
+        mapRef.current.getView().animate({
+          center,
+          zoom,
+          duration: 2000,
+          rotation,
+        });
+      }
+    },
+    [],
+  );
+
+  const contextValue = React.useMemo(
+    () => ({ mapRef, coords, setCoords, goToLocation }),
+    [coords, setCoords, goToLocation],
+  );
 
   return (
-    <MapContext.Provider value={{ mapRef, coords, setCoords, goToLocation }}>
+    <MapContext.Provider value={contextValue}>
       {children}
     </MapContext.Provider>
   );
