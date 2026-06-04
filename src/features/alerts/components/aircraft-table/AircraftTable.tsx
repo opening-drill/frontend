@@ -8,6 +8,7 @@ import {
 } from "@mui/material";
 import FlightIcon from "@mui/icons-material/Flight";
 import config from './AircraftTable.config';
+import type { AlertData } from "../../../../types/hamel";
 
 type Aircraft = {
   id: string,
@@ -40,9 +41,14 @@ const rows: Aircraft[] = [
   { id: "AC-015", name: "Boeing 787-9", type: "Wide-body Airliner", price: 292_500_000, location: "Tokyo Haneda", status: "Reserved", amount: 4, payload: 4 },
 ];
 
-export default function AircraftTable(props: { setIsAircraftTableOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
+export default function AircraftTable(props: { setIsAircraftTableOpen: React.Dispatch<React.SetStateAction<boolean>>, handleAccept: (alert: AlertData) => void, alert: AlertData | null }) {
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
   const [selectedAircraft, setSelectedAircraft] = useState<Aircraft | null>(null);
+
+  const handleLaunch = (alert: AlertData) => {
+    props.setIsAircraftTableOpen(false);
+    props.handleAccept(alert);
+  }
 
   return (
     <Box
@@ -122,7 +128,7 @@ export default function AircraftTable(props: { setIsAircraftTableOpen: React.Dis
           />
         </Box>
         <div className={styles.actions}>
-          <button className={styles.acceptBtn} style={{ background: selectedAircraft === null ? '#16a34a99' : '', color: selectedAircraft === null ? 'grey' : '' }} onClick={() => props.setIsAircraftTableOpen(false)} disabled={selectedAircraft === null}>
+          <button className={styles.acceptBtn} style={{ background: selectedAircraft === null ? '#16a34a99' : '', color: selectedAircraft === null ? 'grey' : '' }}  onClick={() => handleLaunch({ ...props.alert!, aircraft_type: selectedAircraft!.name })} disabled={selectedAircraft === null}>
             launch
           </button>
           <button className={styles.declineBtn} onClick={() => props.setIsAircraftTableOpen(false)}>
