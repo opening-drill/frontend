@@ -1,11 +1,12 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Fab, Dialog, IconButton, Box, Typography, Button } from '@mui/material';
-import TargetIcon from '../assets/TargetIcon.svg';
+import { Dialog, IconButton, Box, Typography, Button } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import { makeStyles } from 'tss-react/mui';
 import PhotoCameraOutlinedIcon from '@mui/icons-material/PhotoCameraOutlined';
 import { PhotoDialog } from './photoDialog';
+import { useDeviceLocation } from '../../../core/store/atoms/locationAtom';
+import { sendAiPipelineReport } from '../../../core/server/api/reportRequests';
 
 const useStyles = makeStyles()((theme) => ({
     fab: {
@@ -167,6 +168,7 @@ export const OpenCameraButton: React.FC<OpenCameraButtonProps> = ({
     onCapture,
 }) => {
     const { classes } = useStyles();
+    const { location } = useDeviceLocation();
     const [isOpen, setIsOpen] = useState(false);
     const [stream, setStream] = useState<MediaStream | null>(null);
     const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
@@ -278,11 +280,44 @@ export const OpenCameraButton: React.FC<OpenCameraButtonProps> = ({
         setCapturedFile(null);
     };
 
-    const handleAccept = (file: File, previewUrl: string) => {
+    const handleAccept = async (file: File, previewUrl: string) => {
         if (onCapture) {
             onCapture(file, previewUrl);
         }
-        alert('עלתה התמונה');
+
+        try {
+            const base64String = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                    const result = reader.result as string;
+                    // Extract just the base64 part, removing the data URL prefix
+                    resolve(result.split(',')[1] || result);
+                };
+                reader.onerror = error => reject(error);
+            });
+
+            const now = new Date();
+            const timeString = now.toISOString(); // Gets full timestamp (e.g. 2026-06-03T18:28:30.000Z)
+
+            const payload = {
+                picture: base64String,
+                user_id: "faf",
+                event_id: crypto.randomUUID().substring(0, 8),
+                target_location: [location.longitude || 0, location.latitude || 0],
+                sent_date: timeString,
+            };
+
+            // Send API POST request
+            await sendAiPipelineReport(payload);
+            console.log('API Request sent successfully', payload);
+
+            // alert('התמונה נשלחה בהצלחה!');
+        } catch (err) {
+            console.error("Failed to send report", err);
+            alert("שגיאה בשליחת הדיווח");
+        }
+
         setIsOpen(false);
         setCapturedImage(null);
         setCapturedFile(null);
