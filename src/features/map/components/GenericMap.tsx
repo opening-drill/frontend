@@ -1,35 +1,34 @@
-import { Box, Button, Typography, Tooltip, IconButton } from "@mui/material";
+import BrushIcon from "@mui/icons-material/Brush";
+import CloseIcon from "@mui/icons-material/Close";
+import CreateIcon from "@mui/icons-material/Create";
+import DeleteIcon from "@mui/icons-material/Delete";
+import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
+import CrosshairIcon from "@mui/icons-material/MyLocation";
+import PentagonIcon from "@mui/icons-material/Pentagon";
+import PlaceIcon from "@mui/icons-material/Place";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import TimelineIcon from "@mui/icons-material/Timeline";
+import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
+import { useAtomValue } from "jotai";
+import Feature from "ol/Feature";
 import Map from "ol/Map";
 import View from "ol/View";
+import { default as Point, default as PointGeometry } from "ol/geom/Point";
+import Draw from "ol/interaction/Draw";
 import TileLayer from "ol/layer/Tile";
 import VectorLayer from "ol/layer/Vector";
-import VectorSource from "ol/source/Vector";
-import Feature from "ol/Feature";
-import Point from "ol/geom/Point";
-import Text from "ol/style/Text";
-import Draw from "ol/interaction/Draw";
-import { Style, Stroke, Fill, Circle as CircleStyle, Icon } from "ol/style";
 import "ol/ol.css";
 import { fromLonLat, toLonLat } from "ol/proj";
 import { XYZ } from "ol/source";
+import VectorSource from "ol/source/Vector";
+import { Circle as CircleStyle, Fill, Icon, Stroke, Style } from "ol/style";
+import Text from "ol/style/Text";
 import { useEffect, useRef, useState } from "react";
 import { makeStyles } from "tss-react/mui";
-import { useAtomValue } from "jotai";
 import { aircraftsAtom } from "../../../store/aircraftAtoms";
 import type { AircraftLive } from "../../../types/aircraft";
-import "../index.css";
-import PentagonIcon from "@mui/icons-material/Pentagon";
-import TimelineIcon from "@mui/icons-material/Timeline";
-import PlaceIcon from "@mui/icons-material/Place";
-import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
-import DeleteIcon from "@mui/icons-material/Delete";
-import BrushIcon from "@mui/icons-material/Brush";
-import CreateIcon from "@mui/icons-material/Create"; 
-import CloseIcon from "@mui/icons-material/Close";   
-import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment"; 
-import CrosshairIcon from "@mui/icons-material/MyLocation"; 
-import PointGeometry from "ol/geom/Point";
 import { useMap } from "../MapProvider";
+import "../index.css";
 import { LOCATIONS } from "../utils/mapUtils";
 
 const useStyles = makeStyles()((theme) => ({
@@ -376,7 +375,6 @@ const GenericMap = () => {
           new TileLayer({
             source: new XYZ({
               url: "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
-              attributions: "© Google",
               maxZoom: 20,
             }),
           }),
@@ -387,6 +385,7 @@ const GenericMap = () => {
           zoom: 12,
           constrainRotation: false,
         }),
+        controls: []
       });
 
       aircraftSourceRef.current = aircraftSource;
@@ -415,7 +414,6 @@ const GenericMap = () => {
         new TileLayer({
           source: new XYZ({
             url: "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
-            attributions: "© Google",
             maxZoom: 20,
           }),
         }),
@@ -426,6 +424,7 @@ const GenericMap = () => {
         zoom: 12,
         constrainRotation: false,
       }),
+      controls: []
     });
 
     // Helper functions to safely update screen location on view shifts
