@@ -4,4 +4,3 @@ import type {
 } from '../types/hamel';
 
 export const activeRecommendationAtom = atom<RecommendationPush[] >([]);
-
