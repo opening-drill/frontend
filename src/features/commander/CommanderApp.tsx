@@ -16,12 +16,13 @@ import {
   Typography,
 } from "@mui/material";
 import { useSetAtom } from "jotai";
-import React from "react";
+import React, { useState } from "react";
 import { makeStyles } from "tss-react/mui";
 import { logoutAtom } from "../../core/store/authAtom";
-import GenericMap from "../map/components/GenericMap";
-import { useHamelSocket } from "../../hooks/useHamelSocket";
 import { useAircraftSocket } from "../../hooks/useAircraftSocket";
+import { useHamelSocket } from "../../hooks/useHamelSocket";
+import type { Drone } from "../base-ops/BaseOpsApp";
+import GenericMap from "../map/components/GenericMap";
 
 const drawerWidth = 240;
 
@@ -61,6 +62,10 @@ const useStyles = makeStyles()((theme) => ({
 export const CommanderApp: React.FC = () => {
   const { classes } = useStyles();
   const logout = useSetAtom(logoutAtom);
+  const [drones] = useState<Drone[]>([
+    { id: 1, coords: [34.7915, 31.2518], name: "רחפן א'" },
+    { id: 2, coords: [34.6152, 31.515], name: "רחפן ב'" },
+  ]);
 
   // Initialize socket listeners
   useHamelSocket();
@@ -133,7 +138,7 @@ export const CommanderApp: React.FC = () => {
           operations below.
         </Typography>
         <Box className={classes.mapWrapper}>
-          <GenericMap />
+          <GenericMap drones={drones} />
         </Box>
       </Box>
     </Box>

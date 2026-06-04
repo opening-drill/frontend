@@ -1,7 +1,7 @@
 import HubIcon from "@mui/icons-material/Hub";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { AppBar, Box, Button, Paper, Toolbar, Typography } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import { makeStyles } from "tss-react/mui";
 import GenericMap from "../map/components/GenericMap";
 import { useMap } from "../map/MapProvider";
@@ -48,11 +48,21 @@ const useStyles = makeStyles()((theme) => ({
   },
 }));
 
+export interface Drone {
+  id: number;
+  coords: number[]; // [lon, lat]
+  name: string;
+}
+
 export const BaseOpsApp: React.FC = () => {
   const { classes } = useStyles();
   const { goToLocation } = useMap();
   const logout = useSetAtom(logoutAtom);
 
+  const [drones, setDrones] = useState<Drone[]>([
+    { id: 1, coords: [34.7915, 31.2518], name: "רחפן א'" },
+    { id: 2, coords: [34.6152, 31.515], name: "רחפן ב'" },
+  ]);
   // Initialize socket listeners
   useHamelSocket();
   useAircraftSocket();
@@ -87,6 +97,23 @@ export const BaseOpsApp: React.FC = () => {
               >
                 go-to
               </Button>
+
+              <Button
+                onClick={() => {
+                  setDrones((prevDrones) =>
+                    prevDrones.map((drone) => ({
+                      ...drone,
+
+                      coords: [
+                        drone.coords[0] + 0.001,
+                        drone.coords[1] + 0.001,
+                      ],
+                    }))
+                  );
+                }}
+              >
+                move
+              </Button>
             </Box>
 
             <Button
@@ -112,7 +139,7 @@ export const BaseOpsApp: React.FC = () => {
       >
         <Paper className={classes.paper} elevation={0}>
           <Box className={classes.mapContainer}>
-            <GenericMap />
+            <GenericMap drones={drones} />
           </Box>
         </Paper>
       </Box>
