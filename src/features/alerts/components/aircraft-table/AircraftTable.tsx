@@ -3,10 +3,10 @@ import { Box, Button, Typography } from "@mui/material";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
 import { getAirCraftStatus } from "../../../../core/server/api/getAircraftStatus";
-import type { AlertData } from "../../../../types/alertTypes";
 import Loader from "../general/Loader";
 import config from "./AircraftTable.config";
 import type { aircraftRowType, aircraftType } from "./AircraftTable.type";
+import type { AlertData } from "../../../../types/alertTypes";
 
 const rows = [
   {
@@ -151,22 +151,23 @@ export const AircraftTable = (props: {
   handleAccept: (alert: AlertData) => void;
   alert: AlertData | null;
 }) => {
-  const [_aircraft, setAircraft] = useState<aircraftType[]>([]);
+  const [aircraft, setAircraft] = useState<aircraftType[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    const fetchAircraft = async () => {
-      try {
-        setLoading(true);
-        const aircraftData = await getAirCraftStatus();
-        setAircraft(aircraftData?.data ?? []);
-      } catch (err) {
-        console.error("Failed to load aircraft:", err);
-        setAircraft([]); //remove when api is fixed
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchAircraft = async () => {
+    try {
+      setLoading(true);
+      console.log(aircraft);
+      const aircraftData = await getAirCraftStatus();
+      setAircraft(aircraftData?.data ?? []);
+    } catch (err) {
+      console.error("Failed to load aircraft:", err);
+      setAircraft([]); //remove when api is fixed
+    } finally {
+      setLoading(false);
+    }
+  };
 
     fetchAircraft();
   }, []);

@@ -21,12 +21,20 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
   const mapRef = useRef<Map | null>(null);
   const [coords, setCoords] = useState<number[]>([34.4668, 31.5016]);
 
-  const goToLocation = (targetCoords: number[], zoom: number = 19.5) => {
+  const goToLocation = (
+    coords: number[],
+    zoom: number = 19.5,
+    heading?: number
+  ) => {
     if (mapRef.current) {
+      const center = fromLonLat(coords);
+      const rotation = heading !== undefined ? (heading * Math.PI) / 180 : undefined;
+
       mapRef.current.getView().animate({
-        center: fromLonLat(targetCoords),
-        zoom: zoom,
+        center,
+        zoom,
         duration: 2000,
+        rotation,
       });
     }
   };

@@ -5,33 +5,33 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import LocalFireDepartmentIcon from "@mui/icons-material/LocalFireDepartment";
 import CrosshairIcon from "@mui/icons-material/MyLocation";
 import PentagonIcon from "@mui/icons-material/Pentagon";
-import TimelineIcon from "@mui/icons-material/Timeline";
+import { defaults as defaultInteractions, Draw } from "ol/interaction";
 import PlaceIcon from "@mui/icons-material/Place";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import TimelineIcon from "@mui/icons-material/Timeline";
 import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import Feature from "ol/Feature";
 import Map from "ol/Map";
 import View from "ol/View";
 import Point from "ol/geom/Point";
-import { defaults as defaultInteractions, Draw } from "ol/interaction";
 import TileLayer from "ol/layer/Tile";
 import VectorLayer from "ol/layer/Vector";
 import "ol/ol.css";
 import { fromLonLat, toLonLat } from "ol/proj";
 import { XYZ } from "ol/source";
 import VectorSource from "ol/source/Vector";
-import { Fill, Icon, Stroke, Style } from "ol/style";
-import CircleStyle from "ol/style/Circle";
-import Text from "ol/style/Text"; // Added missing Text import
-import { useEffect, useRef, useState } from "react";
-import { makeStyles } from "tss-react/mui";
 import { useAtomValue } from "jotai"; // Assuming Jotai is used based on your code
 
 // Adjust these relative imports according to your actual folder structure
 import type { Drone } from "../../base-ops/BaseOpsApp";
-import { useMap } from "../MapProvider";
 import "../index.css";
 import droneIcon from "../utils/drone.png";
+import { Circle as CircleStyle, Fill, Icon, Stroke, Style } from "ol/style";
+import Text from "ol/style/Text";
+import { useEffect, useRef, useState } from "react";
+import { makeStyles } from "tss-react/mui";
+import { useMap } from "../MapProvider";
+import "../index.css";
 import { LOCATIONS } from "../utils/mapUtils";
 import type { AircraftLive } from "../../../types/aircraft";
 import { aircraftsAtom } from "../../../store/aircraftAtoms";
@@ -247,7 +247,7 @@ const useStyles = makeStyles()((theme) => ({
 }));
 
 type MapProps = {
-  drones: Drone[];
+  drones?: Drone[];
 };
 
 type DrawType = "Polygon" | "LineString" | "Point" | "Circle";
@@ -324,7 +324,7 @@ const getAircraftStyle = (aircraft: AircraftLive): Style => {
   });
 };
 
-const GenericMap = ({ drones }: MapProps) => {
+const GenericMap = ({ drones = [] }: MapProps) => {
   const { classes } = useStyles();
   const { mapRef, setCoords } = useMap();
   const mapElement = useRef<HTMLDivElement>(null);
@@ -416,7 +416,6 @@ const GenericMap = ({ drones }: MapProps) => {
         new TileLayer({
           source: new XYZ({
             url: "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
-            attributions: "© Google",
             maxZoom: 20,
           }),
         }),
@@ -430,6 +429,7 @@ const GenericMap = ({ drones }: MapProps) => {
         maxZoom: 22,
         constrainRotation: false,
       }),
+      controls: []
     });
 
     // 4. Setup Event Listeners
