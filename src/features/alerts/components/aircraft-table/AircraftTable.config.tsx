@@ -1,8 +1,7 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Chip, Typography } from "@mui/material";
 // import type { genericCellParam, numericCellParam, statusCellParam } from "./AircraftTable.type";
 import FlightIcon from "@mui/icons-material/Flight";
 import type { GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
-import type { aircraftType } from "./AircraftTable.type";
 
 
 // const statusConfig = {
@@ -19,7 +18,7 @@ const columns: GridColDef[] = [
     headerName: "ID",
     width: 100,
     renderCell: (params: GridRenderCellParams) => (
-      <Typography sx={{ fontFamily: "'DM Mono', monospace", fontSize: "0.78rem", color: "#64748b", letterSpacing: "0.05em" }}>
+      <Typography sx={{ fontFamily: "'DM Mono', monospace", fontSize: "0.78rem", color: "#64748b", letterSpacing: "0.05em", display: 'flex', alignItems: 'center', height: '100%' }}>
         {params.value}
       </Typography>
     ),
@@ -29,10 +28,26 @@ const columns: GridColDef[] = [
     headerName: "Aircraft Name",
     width: 210,
     renderCell: (params: GridRenderCellParams) => (
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, height: '100%' }}>
         <FlightIcon sx={{ fontSize: 14, color: "#38bdf8", opacity: 0.7, transform: "rotate(45deg)" }} />
         <Typography sx={{ fontWeight: 600, fontSize: "0.85rem", color: "#e2e8f0" }}>{params.value}</Typography>
       </Box>
+    ),
+  },
+  {
+    field: "amount",
+    headerName: "Amount",
+    width: 100,
+    renderCell: (params: GridRenderCellParams) => (
+      <Typography sx={{ fontSize: "0.82rem", color: "#cbd5e1", display: 'flex', alignItems: 'center', height: '100%' }}>{params.value}</Typography>
+    ),
+  },
+  {
+    field: "payload",
+    headerName: "Payload",
+    width: 100,
+    renderCell: (params: GridRenderCellParams) => (
+      <Typography sx={{ fontSize: "0.82rem", color: "#cbd5e1", display: 'flex', alignItems: 'center', height: '100%' }}>{params.value}</Typography>
     ),
   },
   {
@@ -43,35 +58,42 @@ const columns: GridColDef[] = [
     valueFormatter: (value: number) =>
       value === 0 ? "Museum Piece" : `$${(value / 1_000_000).toFixed(1)}M`,
     renderCell: (params: GridRenderCellParams) => (
-      <Typography sx={{ fontFamily: "'DM Mono', monospace", fontSize: "0.85rem", color: params.value === 0 ? "#64748b" : "#a3e635", fontWeight: 500 }}>
+      <Typography sx={{ fontFamily: "'DM Mono', monospace", fontSize: "0.85rem", color: params.value === 0 ? "#64748b" : "#a3e635", fontWeight: 500, display: 'flex', alignItems: 'center', height: '100%' }}>
         {params.value === 0 ? "Museum Piece" : `$${(params.value / 1_000_000).toFixed(1)}M`}
       </Typography>
     ),
   },
   {
-    field: "payload",
-    headerName: "Payload (kg)",
+    field: "location",
+    headerName: "Location",
     width: 190,
     renderCell: (params: GridRenderCellParams) => (
-      <Typography sx={{ fontSize: "0.82rem", color: "#94a3b8" }}>{params.value}</Typography>
+      <Typography sx={{ fontSize: "0.82rem", color: "#cbd5e1", display: 'flex', alignItems: 'center', height: '100%' }}>{params.value}</Typography>
     ),
   },
-  {
-    field: "velocity",
-    headerName: "Velocity (km/h)",
-      width: 190,
-    renderCell: (params: GridRenderCellParams) => (
-      <Typography sx={{ fontSize: "0.82rem", color: "#94a3b8" }}>{params.value}</Typography>
-    ),
-  },
+  // {
+  //   field: "status",
+  //   headerName: "Status",
+  //   width: 140,
+  //   renderCell: (params: GridRenderCellParams) => {
+  //     // const cfg = statusConfig[params.value] || {};
+  //     return (
+  //       <Chip
+  //         label={params.value}
+  //         size="small"
+  //         variant="outlined"
+  //         sx={{
+  //           // ...cfg.style,
+  //           fontFamily: "'DM Mono', monospace",
+  //           fontSize: "0.7rem",
+  //           letterSpacing: "0.04em",
+  //           height: 24,
+  //           borderRadius: "6px",
+  //         }}
+  //       />
+  //     );
+  //   },
+  // },
 ];
 
-const formatAircraftData = (aircraft: aircraftType[]) => aircraft.map((ac: aircraftType) => ({
-  id: ac.id,
-  type: ac.type.name,
-  price: ac.type.price,
-  payload: ac.type.payloadKg,
-  velocity: ac.type.velocityKmh,
-}))
-
-export default { columns, formatAircraftData };
+export default { columns }
