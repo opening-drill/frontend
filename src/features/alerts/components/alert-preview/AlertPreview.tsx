@@ -1,4 +1,4 @@
-import type { AlertData } from "../../../../types/hamel";
+import type { AlertData } from "../../../../types/alertTypes";
 import styles from "./AlertPreview.module.css";
 
 interface AttackCardProps {
@@ -58,7 +58,7 @@ export default function AttackCard({
         <div>
           <span className={styles.label}>Coordinates:</span>
           <span>
-            {alert.target.latitude.toFixed(4)}, {alert.target.longitude.toFixed(4)}
+              {alert.target.lat.toFixed(4)}, {alert.target.lng.toFixed(4)}
           </span>
         </div>
 
