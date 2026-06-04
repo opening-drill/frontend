@@ -361,40 +361,19 @@ const GenericMap = () => {
     }
   };
 
-  useEffect(() => {
-    if (!mapRef.current && mapElement.current) {
-      const aircraftSource = new VectorSource();
-      const aircraftLayer = new VectorLayer({
-        source: aircraftSource,
-        zIndex: 100, // Display above base tile layer
-      });
-
-      mapRef.current = new Map({
-        target: mapElement.current,
-        layers: [
-          new TileLayer({
-            source: new XYZ({
-              url: "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
-              maxZoom: 20,
-            }),
-          }),
-          aircraftLayer,
-        ],
-        view: new View({
-          center: fromLonLat(LOCATIONS.gaza.coords),
-          zoom: 12,
-          constrainRotation: false,
-        }),
-        controls: []
-      });
-
-      aircraftSourceRef.current = aircraftSource;
-    }}, [mapRef, mapElement]);
-    
   // ONE-TIME SETUP: Initialized strictly once. Array dependencies left completely empty.
   useEffect(() => {
     if (!mapElement.current) return;
 
+    // Set up aircraft tracking layer
+    const aircraftSource = new VectorSource();
+    const aircraftLayer = new VectorLayer({
+      source: aircraftSource,
+      zIndex: 100, // Display above base tile layer
+    });
+    aircraftSourceRef.current = aircraftSource;
+
+    // Set up drawing/attack layer
     const drawingSource = new VectorSource({ wrapX: false });
     const drawingLayer = new VectorLayer({
       source: drawingSource,
@@ -418,6 +397,7 @@ const GenericMap = () => {
           }),
         }),
         drawingLayer,
+        aircraftLayer,
       ],
       view: new View({
         center: fromLonLat(LOCATIONS.gaza.coords),
