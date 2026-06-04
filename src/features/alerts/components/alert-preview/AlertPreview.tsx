@@ -26,7 +26,7 @@ export default function AttackCard({
         </span>
 
         <span className={styles.summary}>
-          Detected {alert.target.name ?? "Target"} • Launch{" "}
+          Detected {alert.target?.name ?? "Target"} • Launch{" "}
           {alert.aircraft_type}
         </span>
       </div>
@@ -36,7 +36,7 @@ export default function AttackCard({
   return (
     <div className={styles.card}>
       <div className={styles.header}>
-        <h4>{alert.target.name ?? "Unknown Target"}</h4>
+        <h4>{alert.target?.name ?? "Unknown Target"}</h4>
 
         <span className={styles.time}>
           {new Date(alert.received_alert_time).toLocaleTimeString()}
@@ -45,7 +45,7 @@ export default function AttackCard({
 
       <img
         src={alert.image_url}
-        alt={alert.target.name ?? "Target"}
+        alt={alert.target?.name ?? "Target"}
         className={styles.image}
       />
 
@@ -58,7 +58,7 @@ export default function AttackCard({
         <div>
           <span className={styles.label}>Coordinates:</span>
           <span>
-            {alert.target.latitude.toFixed(4)}, {alert.target.longitude.toFixed(4)}
+            {alert.target?.latitude.toFixed(4)}, {alert.target?.longitude.toFixed(4)}
           </span>
         </div>
 

@@ -6,10 +6,8 @@ import HubIcon from '@mui/icons-material/Hub';
 import AttackCardList from './components/open-alerts/OpenAlerts';
 import type { AlertData } from '../../types/hamel';
 import { approveAttackRequest } from '../../core/server/api/approveAttackRequest';
-// import { AircraftTable } from './components/aircraft-table/AircraftTable';
+import { AircraftTable } from './components/aircraft-table/AircraftTable';
 import GenericMap from '../map/components/GenericMap';
-import AircraftTable from './components/aircraft-table/AircraftTable';
-
 
 const useStyles = makeStyles()((theme) => ({
   root: {
@@ -111,8 +109,8 @@ export const AlertsApp: React.FC = () => {
     if (!selectedAlert) return;
     approveAttackRequest({ eventId: alert.event_id, 
       aircraftId: alert.recommended_aircraft_id, 
-      start: { latitude: alert.source.latitude, longitude: alert.source.longitude }, 
-      end: { latitude: alert.target.latitude, longitude: alert.target.longitude }, 
+      start: alert.source ? { latitude: alert.source.latitude, longitude: alert.source.longitude } : undefined, 
+      end: alert.target ? { latitude: alert.target.latitude, longitude: alert.target.longitude } : undefined, 
       urgency: alert.urgency_level });
 
     alerts.splice(alerts.findIndex(a => a.event_id === alert.event_id), 1);
@@ -163,7 +161,7 @@ export const AlertsApp: React.FC = () => {
           </Grid>
           <Grid size={{ xs: 12, md: 8 }}>
             <Box className={classes.mapContainer}>
-              <GenericMap />
+              <GenericMap setIsAircraftTableOpen={setIsAircraftTableOpen} setAlert={setSelectedAlert} />
             </Box>
           </Grid>
         </Grid>

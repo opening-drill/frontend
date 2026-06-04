@@ -1,14 +1,16 @@
 import styles from "./AircraftTable.module.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import {
   Box,
-  Button,
   Typography,
 } from "@mui/material";
 import FlightIcon from "@mui/icons-material/Flight";
 import config from './AircraftTable.config';
 import type { AlertData } from "../../../../types/hamel";
+import type { aircraftType } from "./AircraftTable.type";
+import { getAirCraftStatus } from "../../../../core/server/api/getAircraftStatus";
+import Loader from "../general/Loader";
 
 type Aircraft = {
   id: string,
@@ -41,13 +43,32 @@ const rows: Aircraft[] = [
   { id: "AC-015", name: "Boeing 787-9", type: "Wide-body Airliner", price: 292_500_000, location: "Tokyo Haneda", status: "Reserved", amount: 4, payload: 4 },
 ];
 
-export default function AircraftTable(props: { setIsAircraftTableOpen: React.Dispatch<React.SetStateAction<boolean>>, handleAccept: (alert: AlertData) => void, alert: AlertData | null }) {
+export const  AircraftTable = ({setIsAircraftTableOpen, handleAccept, alert} :{ setIsAircraftTableOpen: React.Dispatch<React.SetStateAction<boolean>>, handleAccept: (alert: AlertData) => void, alert: AlertData | null }) => {
+  const [aircraft, setAircraft] = useState<aircraftType[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+  const fetchAircraft = async () => {
+    try {
+      setLoading(true);
+      const aircraftData = await getAirCraftStatus();
+      setAircraft(aircraftData?.data ?? []);
+    } catch (err) {
+      console.error("Failed to load aircraft:", err);
+      setAircraft([]); //remove when api is fixed
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchAircraft();
+}, []);
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 });
   const [selectedAircraft, setSelectedAircraft] = useState<Aircraft | null>(null);
 
   const handleLaunch = (alert: AlertData) => {
-    props.setIsAircraftTableOpen(false);
-    props.handleAccept(alert);
+    setIsAircraftTableOpen(false);
+    handleAccept(alert);
   }
 
   return (
@@ -82,13 +103,14 @@ export default function AircraftTable(props: { setIsAircraftTableOpen: React.Dis
       {/* Grid */}
       <Box sx={{ width: "100%" }}>
         <Box sx={{ height: '63vh', width: "100%" }}>
+          <Loader isLoading={loading}>
           <DataGrid
             rows={rows}
-            // rows={rows.filter((row) => row.status === AVAILABLE_STATUS)}
+            //rows={rows.filter((row) => row.status === AVAILABLE_STATUS)}
             columns={config.columns}
             getRowId={(row) => row.id}
-            // paginationModel={paginationModel}
-            // onPaginationModelChange={setPaginationModel}
+            paginationModel={paginationModel}
+            onPaginationModelChange={setPaginationModel}
             slots={{ toolbar: GridToolbar }}
             slotProps={{
               toolbar: {
@@ -126,16 +148,17 @@ export default function AircraftTable(props: { setIsAircraftTableOpen: React.Dis
               setSelectedAircraft(isSelected ? null : newSelection.row)
             }}
           />
-        </Box>
+          </Loader>
         <div className={styles.actions}>
-          <button className={styles.acceptBtn} style={{ background: selectedAircraft === null ? '#16a34a99' : '', color: selectedAircraft === null ? 'grey' : '' }}  onClick={() => handleLaunch({ ...props.alert!, aircraft_type: selectedAircraft!.name })} disabled={selectedAircraft === null}>
+          <button className={styles.acceptBtn} style={{ background: selectedAircraft === null ? '#16a34a99' : '', color: selectedAircraft === null ? 'grey' : '' }}  onClick={() => handleLaunch({ ...alert!, aircraft_type: selectedAircraft!.name })} disabled={!selectedAircraft || !alert}>
             launch
           </button>
-          <button className={styles.declineBtn} onClick={() => props.setIsAircraftTableOpen(false)}>
+          <button className={styles.declineBtn} onClick={() => setIsAircraftTableOpen(false)}>
             cancel
           </button>
         </div>
       </Box>
     </Box>
+    </Box>
   );
-}
+};

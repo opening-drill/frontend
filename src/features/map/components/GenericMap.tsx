@@ -30,6 +30,7 @@ import type { AircraftLive } from "../../../types/aircraft";
 import { useMap } from "../MapProvider";
 import "../index.css";
 import { LOCATIONS } from "../utils/mapUtils";
+import type { AlertData } from "../../../types/hamel";
 
 const useStyles = makeStyles()((theme) => ({
   mapContainer: {
@@ -278,7 +279,17 @@ const getFeatureStyle = (color: string, isAttack = false) => {
   });
 };
 
-const getAircraftStyle = (aircraft: AircraftLive): Style => {
+const GenericMap = ({
+  setIsAircraftTableOpen,
+  setAlert,
+}: {
+  setIsAircraftTableOpen: (isOpen: boolean) => void,
+  setAlert: (alert: AlertData | null) => void;
+}) => {
+  const { classes } = useStyles();
+  const { mapRef } = useMap();
+  const mapElement = useRef<HTMLDivElement>(null);
+  const getAircraftStyle = (aircraft: AircraftLive): Style => {
   let color = '#10b981'; // free (emerald/teal)
   if (aircraft.status === 'busy') {
     color = '#f59e0b'; // busy (amber/orange)
@@ -319,12 +330,6 @@ const getAircraftStyle = (aircraft: AircraftLive): Style => {
     }),
     });
     };
-      
-      
-const GenericMap = () => {
-  const { classes } = useStyles();
-  const { mapRef } = useMap();
-  const mapElement = useRef<HTMLDivElement>(null);
   
   // Keep track of the aircraft vector source
   const aircraftSourceRef = useRef<VectorSource | null>(null);
@@ -531,7 +536,8 @@ const GenericMap = () => {
 
   const handleAttackConfirm = () => {
     if (attackCoords) {
-      alert(`מבצע תקיפה לקואורדינטות: ${attackCoords.lat}, ${attackCoords.lon}`);
+      setAlert({target: { latitude: Number(attackCoords?.lat), longitude: Number(attackCoords?.lon) }, received_alert_time: Date.now().toString()})
+      setIsAircraftTableOpen(true);
     }
   };
 
