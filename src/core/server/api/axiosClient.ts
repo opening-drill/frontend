@@ -1,19 +1,17 @@
 import axios from 'axios';
 
-// Use environment variable or default to empty string (which resolves to same origin)
 const API_URL = import.meta.env.VITE_API_URL || '';
 
 export const api = axios.create({
   baseURL: API_URL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Request interceptor to dynamically inject the JWT token from localStorage
 api.interceptors.request.use(
   (config) => {
-    // Do not attach token for the login request
     if (config.url?.endsWith('/auth/login')) {
       return config;
     }
@@ -37,16 +35,15 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle session expiration (e.g. 401 Unauthorized / 403 Forbidden)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const isLoginRequest = error.config?.url?.endsWith('/auth/login');
+    if (error.response?.status === 401 && !isLoginRequest) {
       console.warn('Session expired or unauthorized. Clearing credentials.');
       try {
         localStorage.removeItem('auth_token');
         localStorage.removeItem('auth_user');
-        // We can reload the page to trigger redirect to /login
         window.location.href = '/login';
       } catch (err) {
         console.error('Error cleaning up auth on 401:', err);
