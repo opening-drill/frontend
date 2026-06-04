@@ -531,7 +531,8 @@ const GenericMap = () => {
 
   const handleAttackConfirm = () => {
     if (attackCoords) {
-      alert(`מבצע תקיפה לקואורדינטות: ${attackCoords.lat}, ${attackCoords.lon}`);
+      // Attack confirmation should be handled in-app without browser-native dialogs.
+      handleClosePopupOnly();
     }
   };
 
