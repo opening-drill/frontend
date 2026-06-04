@@ -16,7 +16,6 @@ export interface ChiefToastProps {
 const useStyles = makeStyles()((theme) => ({
   card: {
     position: 'relative',
-    direction: 'rtl',
     backgroundColor: 'rgba(18, 24, 38, 0.95)',
     backdropFilter: 'blur(8px)',
     borderRadius: '16px',
@@ -32,10 +31,10 @@ const useStyles = makeStyles()((theme) => ({
     overflow: 'hidden',
   },
   approvedCard: {
-    borderRight: '8px solid #2ecc71',
+    borderLeft: '8px solid #2ecc71',
   },
   cancelledCard: {
-    borderRight: '8px solid #ff3b30',
+    borderLeft: '8px solid #ff3b30',
   },
   header: {
     display: 'flex',
@@ -145,7 +144,7 @@ export const ChiefToast: React.FC<ChiefToastProps> = ({
           מיקום התקיפה: <span dir="ltr">[{location}]</span>
         </Typography>
         {timestamp && (
-<Typography className={classes.detailText} sx={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '12px', marginTop: '4px', textAlign: 'left', width: '100%' }}>            {timestamp}
+          <Typography className={classes.detailText} sx={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '12px', marginTop: '4px', textAlign: 'left', width: '100%' }}>            {timestamp}
           </Typography>
         )}
       </Box>

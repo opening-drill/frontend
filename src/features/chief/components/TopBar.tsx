@@ -1,4 +1,6 @@
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
+import MyLocationIcon from '@mui/icons-material/MyLocation';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { Box, Typography, IconButton, Badge } from '@mui/material';
@@ -78,17 +80,17 @@ export const TopBar: React.FC = () => {
   const { location } = useDeviceLocation();
   const { notifications, setIsNotificationCenterOpen } = useChiefToast();
   const logout = useSetAtom(logoutAtom);
-  
+
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <Box className={classes.topBarContainer}>
-      <IconButton 
+      <IconButton
         className={classes.circle}
         onClick={() => setIsNotificationCenterOpen(true)}
       >
         <Badge badgeContent={unreadCount} color="error" max={99}>
-          <NotificationsIcon />
+          <NotificationsNoneOutlinedIcon />
         </Badge>
       </IconButton>
 
@@ -105,7 +107,7 @@ export const TopBar: React.FC = () => {
         )}
       </Box>
 
-      <IconButton 
+      <IconButton
         className={classes.circle}
         onClick={() => logout()}
       >

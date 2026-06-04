@@ -17,6 +17,7 @@ const useStyles = makeStyles()((theme) => ({
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
+        direction: 'rtl',
     },
     cameraContainer: {
         display: 'flex',
@@ -119,7 +120,7 @@ export const PhotoDialog: React.FC<PhotoDialogProps> = ({
                 <Box className={classes.cameraContainer}>
                     <img src={capturedImage} alt="Preview" className={classes.capturedImage} />
                     <Typography className={classes.subTitle}>
-                        האם המטרה נראת בבירור ?
+                        ? האם המטרה נראת בבירור
                     </Typography>
                     <Box className={classes.buttonsContainer}>
                         <Button className={classes.reCaptureButton} onClick={onRecapture}>
