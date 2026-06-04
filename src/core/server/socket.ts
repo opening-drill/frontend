@@ -1,7 +1,13 @@
 import { io, type Socket } from 'socket.io-client';
 import type {
   RecommendationPush,
-} from '../../types/alertTypes';
+} from '../../types/hamel';
+import type {
+  Snapshot,
+  AircraftBatch,
+  Zone,
+  DispatchLive,
+} from '../../types/aircraft';
 
 const TOKEN_STORAGE_KEY = 'token';
 const LIVE_NAMESPACE = '/live';
@@ -9,6 +15,11 @@ const LIVE_NAMESPACE = '/live';
 export interface ServerToClientEvents {
   'recommendation:new': (recommendation: RecommendationPush) => void;
   'event:update': (event: unknown) => void;
+  'snapshot': (snapshot: Snapshot) => void;
+  'aircraft:batch': (batch: AircraftBatch) => void;
+  'dispatch:update': (dispatch: DispatchLive) => void;
+  'zone:add': (zone: Zone) => void;
+  'zone:remove': (payload: { zone_id: string }) => void;
 }
 
 export interface ClientToServerEvents {
