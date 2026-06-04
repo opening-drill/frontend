@@ -7,10 +7,10 @@ import {
 } from "@mui/material";
 import FlightIcon from "@mui/icons-material/Flight";
 import config from './AircraftTable.config';
-import type { AlertData } from "../../../../types/hamel";
-import type { aircraftType } from "./AircraftTable.type";
 import { getAirCraftStatus } from "../../../../core/server/api/getAircraftStatus";
 import Loader from "../general/Loader";
+import type { aircraftRowType, aircraftType } from "./AircraftTable.type";
+import type { AlertData } from "../../../../types/alertTypes";
 
 type Aircraft = {
   id: string,
@@ -51,6 +51,7 @@ export const  AircraftTable = ({setIsAircraftTableOpen, handleAccept, alert} :{ 
   const fetchAircraft = async () => {
     try {
       setLoading(true);
+      console.log(aircraft);
       const aircraftData = await getAirCraftStatus();
       setAircraft(aircraftData?.data ?? []);
     } catch (err) {

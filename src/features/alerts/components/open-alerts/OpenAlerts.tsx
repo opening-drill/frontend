@@ -1,8 +1,8 @@
 import { useState } from "react";
 import styles from "./OpenAlertsList.module.css";
-import type { AlertData } from "../../../../types/hamel";
 import AttackCard from "../alert-preview/AlertPreview";
 import { useMap } from "../../../map/MapProvider";
+import type { AlertData } from "../../../../types/alertTypes";
 
 interface Props {
   alerts: AlertData[];
@@ -23,7 +23,7 @@ export default function AttackCardList({
   const { goToLocation } = useMap();
 
   const handleToggle = (alert: AlertData) => {
-    goToLocation([alert.target!.longitude, alert.target!.latitude])
+    goToLocation([alert.target!.lng, alert.target!.lat])
     setOpenId((prev) => (prev === alert.event_id ? null : alert.event_id!));
   };
 
