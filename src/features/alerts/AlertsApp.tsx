@@ -42,7 +42,7 @@ const useStyles = makeStyles()((theme) => ({
     height: 'calc(100vh - 100px)',
     display: 'flex',
     flexGrow: 1,
-    minHeight: 400, 
+    minHeight: 400,
   },
 }));
 
@@ -50,57 +50,57 @@ export const AlertsApp: React.FC = () => {
   const { classes } = useStyles();
 
   const alerts: AlertData[] = [
-  {
-    event_id: "evt-001",
-    received_alert_time: "2026-06-03T14:32:10Z",
-    source: {
-      latitude: 31.7683,
-      longitude: 35.2137,
-      name: "Enemy Tank Column",
+    {
+      event_id: "evt-001",
+      received_alert_time: "2026-06-03T14:32:10Z",
+      source: {
+        latitude: 31.7683,
+        longitude: 35.2137,
+        name: "Enemy Tank Column",
+      },
+      target: {
+        latitude: 31.7683,
+        longitude: 35.2137,
+        name: "Enemy Tank Column",
+      },
+
+      image_url:
+        "https://images.unsplash.com/photo-1511884642898-4c92249e20b6",
+
+      recommended_aircraft_id: "aircraft-f16-01",
+      aircraft_type: "F-16",
+
+      urgency_level: "critical",
+
+      rationale:
+        "Fastest available aircraft with sufficient payload.",
     },
-    target: {
-      latitude: 31.7683,
-      longitude: 35.2137,
-      name: "Enemy Tank Column",
+    {
+      event_id: "evt-002",
+      received_alert_time: "2026-06-03T14:35:22Z",
+      source: {
+        latitude: 32.0853,
+        longitude: 34.7818,
+        name: "Missile Launcher",
+      },
+      target: {
+        latitude: 32.0853,
+        longitude: 34.7818,
+        name: "Missile Launcher",
+      },
+
+      image_url:
+        "https://images.unsplash.com/photo-1548013146-72479768bada",
+
+      recommended_aircraft_id: "aircraft-heron-03",
+      aircraft_type: "Heron UAV",
+
+      urgency_level: "critical",
+
+      rationale:
+        "Persistent surveillance recommended before strike.",
     },
-
-    image_url:
-      "https://images.unsplash.com/photo-1511884642898-4c92249e20b6",
-
-    recommended_aircraft_id: "aircraft-f16-01",
-    aircraft_type: "F-16",
-
-    urgency_level: "critical",
-
-    rationale:
-      "Fastest available aircraft with sufficient payload.",
-  },
-  {
-    event_id: "evt-002",
-    received_alert_time: "2026-06-03T14:35:22Z",
-    source: {
-      latitude: 32.0853,
-      longitude: 34.7818,
-      name: "Missile Launcher",
-    },
-    target: {
-      latitude: 32.0853,
-      longitude: 34.7818,
-      name: "Missile Launcher",
-    },
-
-    image_url:
-      "https://images.unsplash.com/photo-1548013146-72479768bada",
-
-    recommended_aircraft_id: "aircraft-heron-03",
-    aircraft_type: "Heron UAV",
-
-    urgency_level: "critical",
-
-    rationale:
-      "Persistent surveillance recommended before strike.",
-  },
-];
+  ];
 
   const handleAccept = (alert: AlertData) => {
     setSelectedAlert(alert);
@@ -109,11 +109,13 @@ export const AlertsApp: React.FC = () => {
 
   const confirm = (alert: AlertData) => {
     if (!selectedAlert) return;
-    approveAttackRequest({ eventId: alert.event_id, 
-      aircraftId: alert.recommended_aircraft_id, 
-      start: { latitude: alert.source.latitude, longitude: alert.source.longitude }, 
-      end: { latitude: alert.target.latitude, longitude: alert.target.longitude }, 
-      urgency: alert.urgency_level });
+    approveAttackRequest({
+      eventId: alert.event_id,
+      aircraftId: alert.recommended_aircraft_id,
+      start: { latitude: alert.source.latitude, longitude: alert.source.longitude },
+      end: { latitude: alert.target.latitude, longitude: alert.target.longitude },
+      urgency: alert.urgency_level
+    });
 
     alerts.splice(alerts.findIndex(a => a.event_id === alert.event_id), 1);
     setOpenConfirm(false);
@@ -180,7 +182,7 @@ export const AlertsApp: React.FC = () => {
           },
         }}
         open={isAircraftTableOpen} onClose={() => setIsAircraftTableOpen(false)}>
-        <AircraftTable setIsAircraftTableOpen={setIsAircraftTableOpen} handleAccept={handleAccept} alert={selectedAlert}/>
+        <AircraftTable setIsAircraftTableOpen={setIsAircraftTableOpen} handleAccept={handleAccept} alert={selectedAlert} />
       </Dialog>
       <Dialog open={openConfirm} onClose={cancel}>
         <DialogTitle>Are you sure you want to attack?</DialogTitle>

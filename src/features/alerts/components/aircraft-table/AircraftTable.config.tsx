@@ -44,7 +44,7 @@ const columns: GridColDef[] = [
   },
   {
     field: "payload",
-    headerName: "Payload",
+    headerName: "Payload (Kg)",
     width: 100,
     renderCell: (params: GridRenderCellParams) => (
       <Typography sx={{ fontSize: "0.82rem", color: "#cbd5e1", display: 'flex', alignItems: 'center', height: '100%' }}>{params.value}</Typography>
@@ -53,7 +53,7 @@ const columns: GridColDef[] = [
   {
     field: "price",
     headerName: "Price (USD)",
-    width: 160,
+    width: 130,
     type: "number",
     valueFormatter: (value: number) =>
       value === 0 ? "Museum Piece" : `$${(value / 1_000_000).toFixed(1)}M`,
@@ -63,37 +63,37 @@ const columns: GridColDef[] = [
       </Typography>
     ),
   },
-  {
-    field: "location",
-    headerName: "Location",
-    width: 190,
+    {
+    field: "velocity",
+    headerName: "Velocity (Km/h)",
+    width: 150,
     renderCell: (params: GridRenderCellParams) => (
       <Typography sx={{ fontSize: "0.82rem", color: "#cbd5e1", display: 'flex', alignItems: 'center', height: '100%' }}>{params.value}</Typography>
     ),
   },
-  // {
-  //   field: "status",
-  //   headerName: "Status",
-  //   width: 140,
-  //   renderCell: (params: GridRenderCellParams) => {
-  //     // const cfg = statusConfig[params.value] || {};
-  //     return (
-  //       <Chip
-  //         label={params.value}
-  //         size="small"
-  //         variant="outlined"
-  //         sx={{
-  //           // ...cfg.style,
-  //           fontFamily: "'DM Mono', monospace",
-  //           fontSize: "0.7rem",
-  //           letterSpacing: "0.04em",
-  //           height: 24,
-  //           borderRadius: "6px",
-  //         }}
-  //       />
-  //     );
-  //   },
-  // },
+  {
+    field: "status",
+    headerName: "Status",
+    width: 140,
+    renderCell: (params: GridRenderCellParams) => {
+      // const cfg = statusConfig[params.value] || {};
+      return (
+        <Chip
+          label={params.value}
+          size="small"
+          variant="outlined"
+          sx={{
+            // ...cfg.style,
+            fontFamily: "'DM Mono', monospace",
+            fontSize: "0.7rem",
+            letterSpacing: "0.04em",
+            height: 24,
+            borderRadius: "6px",
+          }}
+        />
+      );
+    },
+  },
 ];
 
 export default { columns }
