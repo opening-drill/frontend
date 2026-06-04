@@ -28,7 +28,18 @@ export const useAircraftSocket = (): void => {
   useEffect((): (() => void) => {
     const liveSocket = initializeLiveSocket();
 
+    // ── Debug logging ──────────────────────────────────────────────────────
+    const onConnect = () => console.log('[WS] ✅ Connected to /live, id:', liveSocket.id);
+    const onDisconnect = (reason: string) => console.warn('[WS] ❌ Disconnected:', reason);
+    const onConnectError = (err: Error) => console.error('[WS] 🚫 connect_error:', err.message);
+
+    liveSocket.on('connect', onConnect);
+    liveSocket.on('disconnect', onDisconnect);
+    liveSocket.on('connect_error', onConnectError);
+    // ──────────────────────────────────────────────────────────────────────
+
     const handleSnapshot = (snapshot: Snapshot): void => {
+      console.log('[WS] 📸 snapshot received:', snapshot.aircrafts.length, 'aircraft,', snapshot.zones.length, 'zones,', snapshot.dispatches.length, 'dispatches');
       // Handles new snapshot by completely wiping/overriding the old state
       const initialAircraftMap: Record<string, AircraftLive> = {};
       snapshot.aircrafts.forEach((aircraft) => {
@@ -53,6 +64,7 @@ export const useAircraftSocket = (): void => {
     };
 
     const handleBatch = (batch: AircraftBatch): void => {
+      console.log('[WS] ✈️  aircraft:batch — updates:', batch.updates.length);
       // Merges updates into existing map state by aircraft_id
       setAircrafts((current) => {
         const next = { ...current };
@@ -97,6 +109,9 @@ export const useAircraftSocket = (): void => {
     liveSocket.on('geo:violation', handleGeoViolation);
 
     return (): void => {
+      liveSocket.off('connect', onConnect);
+      liveSocket.off('disconnect', onDisconnect);
+      liveSocket.off('connect_error', onConnectError);
       liveSocket.off('snapshot', handleSnapshot);
       liveSocket.off('aircraft:batch', handleBatch);
       liveSocket.off('zone:add', handleZoneAdd);
@@ -107,3 +122,4 @@ export const useAircraftSocket = (): void => {
     };
   }, [setAircrafts, setZones, setDispatches, setViolations]);
 };
+

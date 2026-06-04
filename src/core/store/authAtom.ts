@@ -3,9 +3,11 @@ import { atomWithStorage } from 'jotai/utils';
 
 export interface User {
   id: string;
-  first_name: string;
-  last_name: string;
-  role: string;
+  username: string;
+  full_name: string;
+  // 'roles' is what the backend sends; 'role' is derived for routing compat
+  roles: string[];
+  role: string; // e.g. '1' = chief, '2' = alerts officer
   permissions: string[];
 }
 

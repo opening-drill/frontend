@@ -8,6 +8,8 @@ import { approveAttackRequest } from '../../core/server/api/approveAttackRequest
 import { AircraftTable } from './components/aircraft-table/AircraftTable';
 import GenericMap from '../map/components/GenericMap';
 import type { AlertData, RecommendationPush } from '../../types/alertTypes';
+import { useAircraftSocket } from '../../hooks/useAircraftSocket';
+import { useHamelSocket } from '../../hooks/useHamelSocket';
 
 
 const useStyles = makeStyles()((theme) => ({
@@ -47,6 +49,10 @@ const useStyles = makeStyles()((theme) => ({
 
 export const AlertsApp: React.FC = () => {
   const { classes } = useStyles();
+
+  // Initialize socket connections
+  useAircraftSocket();
+  useHamelSocket();
 
   const alerts: AlertData[] = [
   {

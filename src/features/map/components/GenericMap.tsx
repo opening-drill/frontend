@@ -13,6 +13,8 @@ import { useAtomValue } from "jotai";
 import Feature from "ol/Feature";
 import Map from "ol/Map";
 import View from "ol/View";
+import Polygon from "ol/geom/Polygon";
+import LineString from "ol/geom/LineString";
 import { default as Point, default as PointGeometry } from "ol/geom/Point";
 import Draw from "ol/interaction/Draw";
 import TileLayer from "ol/layer/Tile";
@@ -25,8 +27,8 @@ import { Circle as CircleStyle, Fill, Icon, Stroke, Style } from "ol/style";
 import Text from "ol/style/Text";
 import { useEffect, useRef, useState } from "react";
 import { makeStyles } from "tss-react/mui";
-import { aircraftsAtom } from "../../../store/aircraftAtoms";
-import type { AircraftLive } from "../../../types/aircraft";
+import { aircraftsAtom, zonesAtom, dispatchesAtom, violationsAtom } from "../../../store/aircraftAtoms";
+import type { AircraftLive, Zone, DispatchLive, GeoViolation } from "../../../types/aircraft";
 import { useMap } from "../MapProvider";
 import "../index.css";
 import { LOCATIONS } from "../utils/mapUtils";
@@ -278,7 +280,7 @@ const getFeatureStyle = (color: string, isAttack = false) => {
   });
 };
 
-const getAircraftStyle = (aircraft: AircraftLive): Style => {
+const getAircraftStyle = (aircraft: AircraftLive, isViolating: boolean): Style => {
   let color = '#10b981'; // free (emerald/teal)
   if (aircraft.status === 'busy') {
     color = '#f59e0b'; // busy (amber/orange)
@@ -286,17 +288,43 @@ const getAircraftStyle = (aircraft: AircraftLive): Style => {
     color = '#ef4444'; // broken (coral/red)
   }
 
-  // Sleek military/tactical UAV/drone SVG icon pointing North (0 degrees)
+  // Tactical layout based on aircraft type
+  const isAttack = aircraft.type === 'attack';
+  
+  // Custom paths: attack uses a fighter jet shape, movement uses the delta surveillance wing
+  const shapePath = isAttack 
+    ? `M18 4 L14 14 L4 20 L14 22 L18 32 L22 22 L32 20 L22 14 Z` 
+    : `M18 6 L12 28 L18 23 L24 28 Z`;
+
+  // Draw a crosshair ring for attack type
+  const attackReticle = isAttack 
+    ? `<circle cx="18" cy="18" r="13" stroke="${color}" stroke-opacity="0.5" stroke-width="1" stroke-dasharray="2 2" fill="none"/>`
+    : '';
+
+  // Draw boundary violation ring and alert badge if violating
+  const violationAlert = isViolating 
+    ? `
+      <circle cx="18" cy="18" r="17" stroke="#ef4444" stroke-width="2" stroke-dasharray="3 1" fill="none"/>
+      <path d="M 27 3 L 33 13 L 21 13 Z" fill="#ef4444" stroke="#ffffff" stroke-width="0.8" />
+      <text x="27" y="12" fill="#ffffff" font-size="8" font-family="monospace" font-weight="bold" text-anchor="middle">!</text>
+    ` 
+    : '';
+
+  // Sleek military/tactical UAV/drone SVG icon
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" fill="none">
       <circle cx="18" cy="18" r="15" stroke="${color}" stroke-opacity="0.3" stroke-width="1.5" fill="${color}" fill-opacity="0.1"/>
-      <path d="M18 6 L12 28 L18 23 L24 28 Z" fill="${color}" stroke="#1e293b" stroke-width="1.5" stroke-linejoin="round"/>
+      ${attackReticle}
+      <path d="${shapePath}" fill="${color}" stroke="#1e293b" stroke-width="1.5" stroke-linejoin="round"/>
       <path d="M18 6 L18 13" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-      `;
+      ${violationAlert}
+    </svg>
+  `;
       
-  const svgDataUri = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+  const svgDataUri = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
   const rotationRad = (aircraft.heading_degrees * Math.PI) / 180;
+
+  const textLabel = `${aircraft.aircraft_type}\n(${aircraft.altitude}m | ${aircraft.horizontal_speed_mps}m/s)`;
 
   return new Style({
     image: new Icon({
@@ -306,19 +334,69 @@ const getAircraftStyle = (aircraft: AircraftLive): Style => {
       anchor: [0.5, 0.5],
     }),
     text: new Text({
-      text: `${aircraft.aircraft_type}\n(${aircraft.altitude}m | ${aircraft.horizontal_speed_mps}m/s)`,
+      text: textLabel,
       font: 'bold 11px Inter, Roboto, Helvetica Neue, sans-serif',
       fill: new Fill({
-        color: '#ffffff',
+        color: isViolating ? '#ff8a80' : '#ffffff',
       }),
       stroke: new Stroke({
-        color: 'rgba(18, 24, 38, 0.85)',
+        color: isViolating ? 'rgba(60, 0, 0, 0.9)' : 'rgba(18, 24, 38, 0.85)',
         width: 3.5,
       }),
       offsetY: 28,
     }),
-    });
-    };
+  });
+};
+
+const getZoneStyle = (feature: Feature): Style => {
+  const zoneType = feature.get('zone_type') || 'dangerous';
+  const name = feature.get('name') || '';
+  
+  let color = '#ef4444'; // dangerous
+  if (zoneType === 'safe') {
+    color = '#10b981';
+  } else if (zoneType === 'no_attack') {
+    color = '#f59e0b';
+  }
+
+  return new Style({
+    fill: new Fill({
+      color: hexToRgba(color, 0.15),
+    }),
+    stroke: new Stroke({
+      color: color,
+      width: 2.5,
+      lineDash: zoneType === 'no_attack' ? [4, 4] : undefined,
+    }),
+    text: new Text({
+      text: name,
+      font: 'bold 12px Inter, Roboto, sans-serif',
+      fill: new Fill({ color: '#ffffff' }),
+      stroke: new Stroke({ color: 'rgba(18, 24, 38, 0.85)', width: 3 }),
+      overflow: true,
+    }),
+  });
+};
+
+const getDispatchPathStyle = (): Style => {
+  return new Style({
+    stroke: new Stroke({
+      color: '#f59e0b', // amber/orange path
+      width: 2,
+      lineDash: [6, 4], // dashed path
+    }),
+  });
+};
+
+const getDispatchTargetStyle = (): Style => {
+  return new Style({
+    image: new Icon({
+      src: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(targetIconSvg)}`,
+      anchor: [0.5, 0.5], 
+      scale: 0.9,
+    }),
+  });
+};
       
       
 const GenericMap = () => {
@@ -326,8 +404,10 @@ const GenericMap = () => {
   const { mapRef } = useMap();
   const mapElement = useRef<HTMLDivElement>(null);
   
-  // Keep track of the aircraft vector source
+  // Keep track of the vector sources
   const aircraftSourceRef = useRef<VectorSource | null>(null);
+  const zoneSourceRef = useRef<VectorSource | null>(null);
+  const dispatchSourceRef = useRef<VectorSource | null>(null);
   const drawingSourceRef = useRef<VectorSource | null>(null);
   const drawingLayerRef = useRef<VectorLayer<VectorSource> | null>(null);
   const drawInteractionRef = useRef<Draw | null>(null);
@@ -365,6 +445,22 @@ const GenericMap = () => {
   useEffect(() => {
     if (!mapElement.current) return;
 
+    // Set up zones tracking layer
+    const zoneSource = new VectorSource();
+    const zoneLayer = new VectorLayer({
+      source: zoneSource,
+      zIndex: 50,
+    });
+    zoneSourceRef.current = zoneSource;
+
+    // Set up dispatches tracking layer
+    const dispatchSource = new VectorSource();
+    const dispatchLayer = new VectorLayer({
+      source: dispatchSource,
+      zIndex: 60,
+    });
+    dispatchSourceRef.current = dispatchSource;
+
     // Set up aircraft tracking layer
     const aircraftSource = new VectorSource();
     const aircraftLayer = new VectorLayer({
@@ -396,6 +492,8 @@ const GenericMap = () => {
             maxZoom: 20,
           }),
         }),
+        zoneLayer,
+        dispatchLayer,
         drawingLayer,
         aircraftLayer,
       ],
@@ -446,6 +544,8 @@ const GenericMap = () => {
         mapRef.current = null;
       }
       aircraftSourceRef.current = null;
+      zoneSourceRef.current = null;
+      dispatchSourceRef.current = null;
     };
   }, []);
 
@@ -542,12 +642,21 @@ const GenericMap = () => {
     { type: "Circle" as DrawType, label: "מעגל", icon: <RadioButtonUncheckedIcon fontSize="small" /> },
   ];
 
-  // Synchronize aircraft state from Jotai with OpenLayers features
+  // Synchronize aircraft state from Jotai with OpenLayers features, checking for boundary violations
   const aircrafts = useAtomValue(aircraftsAtom);
+  const violations = useAtomValue(violationsAtom);
 
   useEffect(() => {
     const source = aircraftSourceRef.current;
-    if (!source) return;
+    if (!source) {
+      console.warn('[MAP] aircraft sync: source not ready yet, skipping');
+      return;
+    }
+
+    const count = Object.keys(aircrafts).length;
+    console.log(`[MAP] syncing ${count} aircraft to OL layer`);
+
+    const violatingIds = new Set(violations.map((v) => v.aircraft_id));
 
     const existingFeatures = source.getFeatures();
     const existingMap: Record<string, Feature> = {};
@@ -567,6 +676,10 @@ const GenericMap = () => {
       }
     });
 
+    let added = 0;
+    let updated = 0;
+    let skipped = 0;
+
     // 2. Add or update features for active aircrafts
     Object.values(aircrafts).forEach((aircraft) => {
       // Coordinate validity guardrail
@@ -577,11 +690,13 @@ const GenericMap = () => {
         isNaN(aircraft.location.lng) ||
         isNaN(aircraft.location.lat)
       ) {
+        skipped++;
         return;
       }
 
       const feature = existingMap[aircraft.aircraft_id];
       const coords = fromLonLat([aircraft.location.lng, aircraft.location.lat]);
+      const isViolating = violatingIds.has(aircraft.aircraft_id);
 
       if (feature) {
         // Update geometry in-place
@@ -591,7 +706,8 @@ const GenericMap = () => {
         }
         // Update properties, styles, and orientation
         feature.setProperties(aircraft);
-        feature.setStyle(getAircraftStyle(aircraft));
+        feature.setStyle(getAircraftStyle(aircraft, isViolating));
+        updated++;
       } else {
         // Create a new feature for the new aircraft
         const newFeature = new Feature({
@@ -599,11 +715,146 @@ const GenericMap = () => {
         });
         newFeature.setId(aircraft.aircraft_id);
         newFeature.setProperties(aircraft);
-        newFeature.setStyle(getAircraftStyle(aircraft));
+        newFeature.setStyle(getAircraftStyle(aircraft, isViolating));
+        source.addFeature(newFeature);
+        added++;
+      }
+    });
+
+    console.log(`[MAP] done: +${added} added, ~${updated} updated, ✗${skipped} skipped (bad coords)`);
+  }, [aircrafts, violations]);
+
+
+  // Synchronize zones state from Jotai with OpenLayers features
+  const zonesMap = useAtomValue(zonesAtom);
+
+  useEffect(() => {
+    const source = zoneSourceRef.current;
+    if (!source) return;
+
+    const existingFeatures = source.getFeatures();
+    const existingMap: Record<string, Feature> = {};
+    existingFeatures.forEach((feature) => {
+      const id = feature.getId() as string;
+      if (id) {
+        existingMap[id] = feature;
+      }
+    });
+
+    const activeIds = new Set(Object.keys(zonesMap).map((id) => `zone-${id}`));
+
+    // Remove obsolete zones
+    Object.keys(existingMap).forEach((id) => {
+      if (!activeIds.has(id)) {
+        source.removeFeature(existingMap[id]);
+      }
+    });
+
+    // Add or update zones
+    Object.values(zonesMap).forEach((zone) => {
+      if (!zone.area || zone.area.type !== "Polygon" || !zone.area.coordinates) {
+        return;
+      }
+
+      const id = `zone-${zone.zone_id}`;
+      const feature = existingMap[id];
+      
+      // Project GeoJSON coordinates: outer ring + inner rings
+      const coords = zone.area.coordinates.map((ring) =>
+        ring.map((coord) => fromLonLat(coord))
+      );
+      const polygonGeom = new Polygon(coords);
+
+      if (feature) {
+        feature.setGeometry(polygonGeom);
+        feature.setProperties(zone);
+        feature.setStyle(getZoneStyle(feature));
+      } else {
+        const newFeature = new Feature({
+          geometry: polygonGeom,
+        });
+        newFeature.setId(id);
+        newFeature.setProperties(zone);
+        newFeature.setStyle(getZoneStyle(newFeature));
         source.addFeature(newFeature);
       }
     });
-  }, [aircrafts]);
+  }, [zonesMap]);
+
+  // Synchronize dispatches state from Jotai with OpenLayers features
+  const dispatchesMap = useAtomValue(dispatchesAtom);
+
+  useEffect(() => {
+    const source = dispatchSourceRef.current;
+    if (!source) return;
+
+    const existingFeatures = source.getFeatures();
+    const existingMap: Record<string, Feature> = {};
+    existingFeatures.forEach((feature) => {
+      const id = feature.getId() as string;
+      if (id) {
+        existingMap[id] = feature;
+      }
+    });
+
+    const activeIds = new Set();
+    Object.values(dispatchesMap).forEach((dispatch) => {
+      activeIds.add(`dispatch-path-${dispatch.aircraft_id}`);
+      activeIds.add(`dispatch-target-${dispatch.aircraft_id}`);
+    });
+
+    // Remove obsolete dispatch features
+    Object.keys(existingMap).forEach((id) => {
+      if (!activeIds.has(id)) {
+        source.removeFeature(existingMap[id]);
+      }
+    });
+
+    // Add or update dispatch features
+    Object.values(dispatchesMap).forEach((dispatch) => {
+      if (!dispatch.origin || !dispatch.target) return;
+
+      const originLng = Number(dispatch.origin.lng);
+      const originLat = Number(dispatch.origin.lat);
+      const targetLng = Number(dispatch.target.lng);
+      const targetLat = Number(dispatch.target.lat);
+
+      if (isNaN(originLng) || isNaN(originLat) || isNaN(targetLng) || isNaN(targetLat)) return;
+
+      const pathId = `dispatch-path-${dispatch.aircraft_id}`;
+      const targetId = `dispatch-target-${dispatch.aircraft_id}`;
+
+      const pathCoords = [
+        fromLonLat([originLng, originLat]),
+        fromLonLat([targetLng, targetLat]),
+      ];
+      const targetCoord = fromLonLat([targetLng, targetLat]);
+
+      // 1. Path Feature
+      const pathFeature = existingMap[pathId];
+      const lineGeom = new LineString(pathCoords);
+      if (pathFeature) {
+        pathFeature.setGeometry(lineGeom);
+      } else {
+        const newPath = new Feature({ geometry: lineGeom });
+        newPath.setId(pathId);
+        newPath.setStyle(getDispatchPathStyle());
+        source.addFeature(newPath);
+      }
+
+      // 2. Target Feature
+      const targetFeature = existingMap[targetId];
+      const pointGeom = new Point(targetCoord);
+      if (targetFeature) {
+        targetFeature.setGeometry(pointGeom);
+      } else {
+        const newTarget = new Feature({ geometry: pointGeom });
+        newTarget.setId(targetId);
+        newTarget.setStyle(getDispatchTargetStyle());
+        source.addFeature(newTarget);
+      }
+    });
+  }, [dispatchesMap]);
 
   return (
     <Box className={classes.mapContainer}>

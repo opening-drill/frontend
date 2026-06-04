@@ -7,6 +7,8 @@ import GenericMap from '../map/components/GenericMap';
 import { useMap } from '../map/MapProvider';
 import { NotificationCenter } from './components/NotificationCenter';
 import { TopBar } from './components/TopBar';
+import { useAircraftSocket } from '../../hooks/useAircraftSocket';
+import { useHamelSocket } from '../../hooks/useHamelSocket';
 
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import { Box, IconButton } from '@mui/material';
@@ -130,6 +132,10 @@ const ChiefAppContent: React.FC = () => {
   const { classes } = useStyles();
   const { location, refreshLocation } = useDeviceLocation();
   const { goToLocation } = useMap();
+
+  // Initialize socket connections
+  useAircraftSocket();
+  useHamelSocket();
 
   const handleRecenter = () => {
     if (location.error) {

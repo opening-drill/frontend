@@ -50,7 +50,7 @@ const RootRouter: React.FC = () => {
         path="/"
         element={
           <ProtectedRoute>
-            {role === '1' ? <ChiefApp /> : <AlertsApp />}
+            {(role === '1' || role === 'admin') ? <ChiefApp /> : <AlertsApp />}
           </ProtectedRoute>
         }
       />

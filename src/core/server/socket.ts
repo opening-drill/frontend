@@ -1,7 +1,5 @@
 import { io, type Socket } from 'socket.io-client';
-import type {
-  RecommendationPush,
-} from '../../types/hamel';
+import type { RecommendationPush } from '../../types/hamel';
 import type {
   Snapshot,
   AircraftBatch,
@@ -10,7 +8,6 @@ import type {
   GeoViolationPush,
 } from '../../types/aircraft';
 
-const TOKEN_STORAGE_KEY = 'token';
 const LIVE_NAMESPACE = '/live';
 
 export interface ServerToClientEvents {
@@ -30,30 +27,75 @@ export interface ClientToServerEvents {
 
 export type LiveSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
-const getSocketBaseUrl = (): string => {
-  return import.meta.env.VITE_SOCKET_URL ?? '';
+/**
+ * Reads the auth token from localStorage.
+ * Jotai's atomWithStorage serializes values as JSON, so the raw
+ * stored value is a JSON-encoded string (e.g. `"\"eyJ...\""`).
+ * We JSON.parse it to get the plain JWT string.
+ */
+const getAuthToken = (): string | null => {
+  try {
+    const raw = localStorage.getItem('auth_token');
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return typeof parsed === 'string' ? parsed : null;
+  } catch {
+    return null;
+  }
 };
 
-export const socket: LiveSocket = io(`${getSocketBaseUrl()}${LIVE_NAMESPACE}`, {
-  auth: {
-    token: localStorage.getItem(TOKEN_STORAGE_KEY),
-  },
-  autoConnect: false,
-  transports: ['websocket'],
-});
+const getSocketBaseUrl = (): string => {
+  const url =
+    import.meta.env.VITE_SOCKET_URL ||
+    import.meta.env.VITE_API_URL ||
+    '';
+  return url.replace(/\/+$/, '');
+};
 
+// ─── Singleton socket ─────────────────────────────────────────────────────────
+let _socket: LiveSocket | null = null;
+let _refCount = 0;
+
+const getOrCreateSocket = (): LiveSocket => {
+  if (!_socket) {
+    _socket = io(`${getSocketBaseUrl()}${LIVE_NAMESPACE}`, {
+      auth: { token: getAuthToken() },
+      autoConnect: false,
+      transports: ['websocket'],
+    });
+  }
+  return _socket;
+};
+
+/**
+ * Call once per hook/component that wants to use the live socket.
+ * Increments the reference count; actually connects on first call.
+ */
 export const initializeLiveSocket = (): LiveSocket => {
-  socket.auth = {
-    token: localStorage.getItem(TOKEN_STORAGE_KEY),
-  };
+  const sock = getOrCreateSocket();
 
-  if (!socket.connected) {
-    socket.connect();
+  // Refresh auth token every time a new consumer connects
+  sock.auth = { token: getAuthToken() };
+
+  _refCount++;
+  if (!sock.connected) {
+    sock.connect();
   }
 
-  return socket;
+  return sock;
 };
 
+/**
+ * Call in the cleanup of every hook/component that called initializeLiveSocket.
+ * Only physically disconnects when the last consumer releases the socket.
+ */
 export const disconnectLiveSocket = (): void => {
-  socket.disconnect();
+  _refCount = Math.max(0, _refCount - 1);
+  if (_refCount === 0 && _socket) {
+    _socket.disconnect();
+    _socket = null;
+  }
 };
+
+/** Direct access to the current singleton (may be null if not initialised). */
+export const socket: LiveSocket = getOrCreateSocket();
