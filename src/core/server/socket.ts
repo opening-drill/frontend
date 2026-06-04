@@ -9,8 +9,11 @@ import type {
   DispatchLive,
 } from '../../types/aircraft';
 
-const TOKEN_STORAGE_KEY = 'token';
+const AUTH_TOKEN_STORAGE_KEY = 'auth_token';
 const LIVE_NAMESPACE = '/live';
+const DISCONNECT_DELAY_MS = 250;
+let activeSocketConsumers = 0;
+let disconnectTimeoutId: number | null = null;
 
 export interface ServerToClientEvents {
   'recommendation:new': (recommendation: RecommendationPush) => void;
@@ -29,20 +32,42 @@ export interface ClientToServerEvents {
 export type LiveSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
 const getSocketBaseUrl = (): string => {
-  return 'https://live-data-1015949672422.europe-west1.run.app'
+  return import.meta.env.VITE_SOCKET_URL ?? 'https://live-data-1015949672422.europe-west1.run.app';
+};
+
+const getAuthToken = (): string | null => {
+  const storedToken = localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+
+  if (!storedToken) {
+    return null;
+  }
+
+  try {
+    const parsedToken: unknown = JSON.parse(storedToken);
+    return typeof parsedToken === 'string' ? parsedToken : null;
+  } catch {
+    return storedToken;
+  }
 };
 
 export const socket: LiveSocket = io(`${getSocketBaseUrl()}${LIVE_NAMESPACE}`, {
   auth: {
-    token: localStorage.getItem(TOKEN_STORAGE_KEY),
+    token: getAuthToken(),
   },
   autoConnect: false,
   transports: ['websocket'],
 });
 
 export const initializeLiveSocket = (): LiveSocket => {
+  activeSocketConsumers += 1;
+
+  if (disconnectTimeoutId !== null) {
+    window.clearTimeout(disconnectTimeoutId);
+    disconnectTimeoutId = null;
+  }
+
   socket.auth = {
-    token: localStorage.getItem(TOKEN_STORAGE_KEY),
+    token: getAuthToken(),
   };
 
   if (!socket.connected) {
@@ -53,5 +78,17 @@ export const initializeLiveSocket = (): LiveSocket => {
 };
 
 export const disconnectLiveSocket = (): void => {
-  socket.disconnect();
+  activeSocketConsumers = Math.max(0, activeSocketConsumers - 1);
+
+  if (activeSocketConsumers > 0) {
+    return;
+  }
+
+  disconnectTimeoutId = window.setTimeout(() => {
+    if (activeSocketConsumers === 0) {
+      socket.disconnect();
+    }
+
+    disconnectTimeoutId = null;
+  }, DISCONNECT_DELAY_MS);
 };
