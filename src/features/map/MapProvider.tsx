@@ -1,3 +1,5 @@
+import Map from "ol/Map";
+import { fromLonLat } from "ol/proj";
 import React, {
   createContext,
   useContext,
@@ -5,14 +7,12 @@ import React, {
   useState,
   type ReactNode,
 } from "react";
-import Map from "ol/Map";
-import { fromLonLat } from "ol/proj";
 
 interface MapContextProps {
   mapRef: React.MutableRefObject<Map | null>;
   coords: number[];
   setCoords: React.Dispatch<React.SetStateAction<number[]>>;
-  goToLocation: (coords: number[], zoom?: number) => void;
+  goToLocation: (coords: number[], zoom?: number, heading?: number) => void;
 }
 
 const MapContext = createContext<MapContextProps | null>(null);

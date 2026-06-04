@@ -8,6 +8,8 @@ import { useMap } from "../map/MapProvider";
 import { LOCATIONS } from "../map/utils/mapUtils";
 import { useSetAtom } from "jotai";
 import { logoutAtom } from "../../core/store/authAtom";
+import { useHamelSocket } from "../../hooks/useHamelSocket";
+import { useAircraftSocket } from "../../hooks/useAircraftSocket";
 
 const useStyles = makeStyles()((theme) => ({
   root: {
@@ -61,6 +63,9 @@ export const BaseOpsApp: React.FC = () => {
     { id: 1, coords: [34.7915, 31.2518], name: "רחפן א'" },
     { id: 2, coords: [34.6152, 31.515], name: "רחפן ב'" },
   ]);
+  // Initialize socket listeners
+  useHamelSocket();
+  useAircraftSocket();
 
   return (
     <Box className={classes.root}>

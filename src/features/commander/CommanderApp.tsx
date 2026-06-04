@@ -19,8 +19,10 @@ import { useSetAtom } from "jotai";
 import React, { useState } from "react";
 import { makeStyles } from "tss-react/mui";
 import { logoutAtom } from "../../core/store/authAtom";
-import GenericMap from "../map/components/GenericMap";
+import { useAircraftSocket } from "../../hooks/useAircraftSocket";
+import { useHamelSocket } from "../../hooks/useHamelSocket";
 import type { Drone } from "../base-ops/BaseOpsApp";
+import GenericMap from "../map/components/GenericMap";
 
 const drawerWidth = 240;
 
@@ -64,6 +66,10 @@ export const CommanderApp: React.FC = () => {
     { id: 1, coords: [34.7915, 31.2518], name: "רחפן א'" },
     { id: 2, coords: [34.6152, 31.515], name: "רחפן ב'" },
   ]);
+
+  // Initialize socket listeners
+  useHamelSocket();
+  useAircraftSocket();
 
   return (
     <Box className={classes.root}>
