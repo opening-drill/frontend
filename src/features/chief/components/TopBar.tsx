@@ -109,7 +109,7 @@ export const TopBar: React.FC = () => {
         className={classes.circle}
         onClick={() => logout()}
       >
-        <LogoutIcon />
+        <LogoutIcon sx={{ transform: 'scaleX(-1)' }} />
       </IconButton>
     </Box>
   );
