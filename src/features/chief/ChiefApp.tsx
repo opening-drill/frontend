@@ -16,6 +16,7 @@ import React from 'react';
 import { Slide, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { lastMapInteractionAtom } from '../../core/store/atoms/mapInteractionAtom';
+import { useBombNotification } from '../../hooks/useBombNotification';
 import { ChiefToastProvider } from './context/ChiefToastContext';
 
 const useStyles = makeStyles()((theme) => ({
@@ -132,6 +133,9 @@ const ChiefAppContent: React.FC = () => {
   const { classes } = useStyles();
   const { location, refreshLocation } = useDeviceLocation();
   const { goToLocation } = useMap();
+  
+  // Initialize bomb drop socket listener
+  useBombNotification();
 
   const handleRecenter = async () => {
     // Request compass permission for iOS 13+ devices

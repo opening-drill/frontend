@@ -15,3 +15,9 @@ export interface RecommendationPush {
   urgency_level: UrgencyLevel;
   rationale?: string;
 }
+
+export interface EventUpdate {
+  event_id: string;
+  phase?: 'enroute' | 'arrived' | 'struck' | 'aborted';
+  message?: string;   // human-ready text (Hebrew) — safe to show directly
+}
