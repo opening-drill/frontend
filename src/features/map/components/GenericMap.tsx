@@ -539,9 +539,6 @@ const GenericMap = ({
       setAlert({target: { latitude: Number(attackCoords?.lat), longitude: Number(attackCoords?.lon) }, received_alert_time: Date.now().toString()})
       setIsAircraftTableOpen(true);
     }
-    if (attackCoords) {
-      alert(`מבצע תקיפה לקואורדינטות: ${attackCoords.lat}, ${attackCoords.lon}`);
-    }
   };
 
   const tools = [
