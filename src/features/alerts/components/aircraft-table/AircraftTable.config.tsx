@@ -54,7 +54,7 @@ const columns: GridColDef[] = [
   {
     field: "price",
     headerName: "Price (USD)",
-    width: 160,
+    width: 130,
     type: "number",
     renderCell: (params: GridRenderCellParams) => (
       <Typography sx={{ fontFamily: "'DM Mono', monospace", fontSize: "0.85rem", color: params.value === 0 ? "#64748b" : "#a3e635", fontWeight: 500, display: 'flex', alignItems: 'center', height: '100%' }}>
@@ -70,29 +70,29 @@ const columns: GridColDef[] = [
       <Typography sx={{ fontSize: "0.82rem", color: "#cbd5e1", display: 'flex', alignItems: 'center', height: '100%' }}>{params.value}</Typography>
     ),
   },
-  // {
-  //   field: "status",
-  //   headerName: "Status",
-  //   width: 140,
-  //   renderCell: (params: GridRenderCellParams) => {
-  //     // const cfg = statusConfig[params.value] || {};
-  //     return (
-  //       <Chip
-  //         label={params.value}
-  //         size="small"
-  //         variant="outlined"
-  //         sx={{
-  //           // ...cfg.style,
-  //           fontFamily: "'DM Mono', monospace",
-  //           fontSize: "0.7rem",
-  //           letterSpacing: "0.04em",
-  //           height: 24,
-  //           borderRadius: "6px",
-  //         }}
-  //       />
-  //     );
-  //   },
-  // },
+  {
+    field: "status",
+    headerName: "Status",
+    width: 140,
+    renderCell: (params: GridRenderCellParams) => {
+      // const cfg = statusConfig[params.value] || {};
+      return (
+        <Chip
+          label={params.value}
+          size="small"
+          variant="outlined"
+          sx={{
+            // ...cfg.style,
+            fontFamily: "'DM Mono', monospace",
+            fontSize: "0.7rem",
+            letterSpacing: "0.04em",
+            height: 24,
+            borderRadius: "6px",
+          }}
+        />
+      );
+    },
+  },
 ];
 
 const formatAircraftToRows = (aircraft: aircraftType[]): aircraftRowType[] => aircraft.map(ac => ({
