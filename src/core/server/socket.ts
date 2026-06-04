@@ -1,6 +1,7 @@
 import { io, type Socket } from 'socket.io-client';
 import type {
   RecommendationPush,
+  EventUpdate,
 } from '../../types/hamel';
 import type {
   Snapshot,
@@ -17,7 +18,7 @@ let disconnectTimeoutId: number | null = null;
 
 export interface ServerToClientEvents {
   'recommendation:new': (recommendation: RecommendationPush) => void;
-  'event:update': (event: unknown) => void;
+  'event:update': (event: EventUpdate) => void;
   'snapshot': (snapshot: Snapshot) => void;
   'aircraft:batch': (batch: AircraftBatch) => void;
   'dispatch:update': (dispatch: DispatchLive) => void;

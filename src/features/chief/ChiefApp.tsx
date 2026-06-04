@@ -11,9 +11,12 @@ import { TopBar } from './components/TopBar';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import { Box, IconButton } from '@mui/material';
 import { alpha } from '@mui/material/styles';
+import { useAtomValue } from 'jotai';
 import React from 'react';
 import { Slide, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { lastMapInteractionAtom } from '../../core/store/atoms/mapInteractionAtom';
+import { useBombNotification } from '../../hooks/useBombNotification';
 import { ChiefToastProvider } from './context/ChiefToastContext';
 
 const useStyles = makeStyles()((theme) => ({
@@ -130,8 +133,25 @@ const ChiefAppContent: React.FC = () => {
   const { classes } = useStyles();
   const { location, refreshLocation } = useDeviceLocation();
   const { goToLocation } = useMap();
+  
+  // Initialize bomb drop socket listener
+  useBombNotification();
 
-  const handleRecenter = () => {
+  const handleRecenter = async () => {
+    // Request compass permission for iOS 13+ devices
+    // This must be triggered by a user gesture, so the Recenter button is the perfect place
+    if (typeof (DeviceOrientationEvent as any) !== 'undefined' && typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
+      try {
+        const permissionState = await (DeviceOrientationEvent as any).requestPermission();
+        if (permissionState === 'granted') {
+          // Trigger a re-render to ensure the listener is active
+          refreshLocation();
+        }
+      } catch (err) {
+        console.error('Error requesting compass permission:', err);
+      }
+    }
+
     if (location.error) {
       refreshLocation();
     } else if (location.longitude && location.latitude) {
@@ -139,31 +159,53 @@ const ChiefAppContent: React.FC = () => {
     }
   };
 
-  const lastUpdateRef = useRef<number>(0);
+  const hasCenteredRef = useRef(false);
+  const lastUpdateRef = useRef<number>(Date.now());
+  const lastMapInteraction = useAtomValue(lastMapInteractionAtom);
 
-  // Throttled effect to track location movements and heading
+  // Auto-center effect with interaction cooldown
   useEffect(() => {
-    if (location.latitude && location.longitude) {
-      const now = Date.now();
-      const timeSinceLastUpdate = now - lastUpdateRef.current;
-      let timeoutId: ReturnType<typeof setTimeout>;
+    if (!location.latitude || !location.longitude) return;
 
-      const executeUpdate = () => {
-        goToLocation([location.longitude!, location.latitude!], 19.5, location.heading ?? undefined);
-        lastUpdateRef.current = Date.now();
-      };
-
-      if (timeSinceLastUpdate >= 1000) {
-        executeUpdate();
-      } else {
-        timeoutId = setTimeout(executeUpdate, 1000 - timeSinceLastUpdate);
-      }
-
-      return () => {
-        if (timeoutId) clearTimeout(timeoutId);
-      };
+    // Center the map immediately on first load
+    if (!hasCenteredRef.current) {
+      goToLocation([location.longitude, location.latitude], 19.5);
+      hasCenteredRef.current = true;
+      lastUpdateRef.current = Date.now();
+      return;
     }
-  }, [location.latitude, location.longitude, location.heading, goToLocation]);
+
+    // If we don't have a compass heading, we don't auto-track 
+    // (per the requirement: "when there is a heading...")
+    if (location.heading === null || location.heading === undefined) {
+      return;
+    }
+
+    const checkAndTrack = () => {
+      const now = Date.now();
+      const timeSinceInteraction = now - lastMapInteraction;
+      
+      // Cooldown: wait 3 seconds after the user touches the map before resuming
+      if (timeSinceInteraction >= 3000) {
+        const timeSinceLastUpdate = now - lastUpdateRef.current;
+        // Re-center every 1 second
+        if (timeSinceLastUpdate >= 1000) {
+          // Pass undefined for zoom so it pans smoothly without resetting the user's manual zoom
+          goToLocation([location.longitude!, location.latitude!], undefined);
+          lastUpdateRef.current = Date.now();
+        }
+      }
+    };
+
+    // Check immediately on every location state update
+    checkAndTrack();
+
+    // Also run an interval loop to continuously pull the map back 1 second after cooldown expires
+    // even if location hasn't changed
+    const intervalId = setInterval(checkAndTrack, 500);
+
+    return () => clearInterval(intervalId);
+  }, [location.latitude, location.longitude, location.heading, lastMapInteraction, goToLocation]);
 
   return (
     <Box className={classes.root}>

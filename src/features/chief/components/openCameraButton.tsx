@@ -5,6 +5,8 @@ import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import { makeStyles } from 'tss-react/mui';
 import PhotoCameraOutlinedIcon from '@mui/icons-material/PhotoCameraOutlined';
 import { PhotoDialog } from './photoDialog';
+import { useDeviceLocation } from '../../../core/store/atoms/locationAtom';
+import { sendAiPipelineReport } from '../../../core/server/api/reportRequests';
 
 const useStyles = makeStyles()((theme) => ({
     fab: {
@@ -45,7 +47,8 @@ const useStyles = makeStyles()((theme) => ({
         fontFamily: '"Heebo", sans-serif',
         fontSize: '18px',
         fontWeight: 600,
-        backgroundColor: '#2C2C2C'
+        backgroundColor: '#2C2C2C',
+        direction: 'rtl',
     },
     dialogPaper: {
         backgroundColor: '#000000',
@@ -59,6 +62,7 @@ const useStyles = makeStyles()((theme) => ({
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
+        direction: 'rtl',
     },
     cameraContainer: {
         display: 'flex',
@@ -79,19 +83,16 @@ const useStyles = makeStyles()((theme) => ({
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '20px 50px',
-        paddingBottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
+        padding: '30px 40px',
+        paddingBottom: 'calc(30px + env(safe-area-inset-bottom, 0px))',
         zIndex: 10,
         [theme.breakpoints.down('sm')]: {
-            padding: '15px 20px',
-            paddingBottom: 'calc(15px + env(safe-area-inset-bottom, 0px))',
+            padding: '25px',
+            paddingBottom: 'calc(40px + env(safe-area-inset-bottom, 0px))',
         }
     },
     galleryButton: {
         color: '#ffffff',
-        backgroundColor: 'rgba(255, 255, 255, 0.15)',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(255, 255, 255, 0.3)',
         width: '50px',
         height: '50px',
         borderRadius: '50%',
@@ -167,6 +168,7 @@ export const OpenCameraButton: React.FC<OpenCameraButtonProps> = ({
     onCapture,
 }) => {
     const { classes } = useStyles();
+    const { location } = useDeviceLocation();
     const [isOpen, setIsOpen] = useState(false);
     const [stream, setStream] = useState<MediaStream | null>(null);
     const [facingMode] = useState<'user' | 'environment'>('environment');
@@ -278,11 +280,50 @@ export const OpenCameraButton: React.FC<OpenCameraButtonProps> = ({
         setCapturedFile(null);
     };
 
-    const handleAccept = (file: File, previewUrl: string) => {
+    const handleAccept = async (file: File, previewUrl: string) => {
         if (onCapture) {
             onCapture(file, previewUrl);
         }
-        alert('עלתה התמונה');
+
+        try {
+            const base64String = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                    const result = reader.result as string;
+                    // Extract just the base64 part, removing the data URL prefix
+                    resolve(result.split(',')[1] || result);
+                };
+                reader.onerror = error => reject(error);
+            });
+
+            const now = new Date();
+            const timeString = now.toISOString(); // Gets full timestamp (e.g. 2026-06-03T18:28:30.000Z)
+
+            const payload = {
+                picture: base64String,
+                user_id: (() => {
+                    try {
+                        return JSON.parse(localStorage.getItem('auth_user') || '{}').id || "unknown";
+                    } catch (e) {
+                        return "unknown";
+                    }
+                })(),
+                event_id: crypto.randomUUID().substring(0, 8),
+                target_location: [location.longitude || 0, location.latitude || 0],
+                sent_date: timeString,
+            };
+
+            // Send API POST request
+            await sendAiPipelineReport(payload);
+            console.log('API Request sent successfully', payload);
+
+            // alert('התמונה נשלחה בהצלחה!');
+        } catch (err) {
+            console.error("Failed to send report", err);
+            alert("שגיאה בשליחת הדיווח");
+        }
+
         setIsOpen(false);
         setCapturedImage(null);
         setCapturedFile(null);

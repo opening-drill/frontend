@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { makeStyles } from 'tss-react/mui';
 import { useChiefToast } from '../context/ChiefToastContext';
 import { ChiefToast } from './ChiefToast';
-import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 
 const useStyles = makeStyles()((theme) => ({
   drawerPaper: {
@@ -15,7 +15,6 @@ const useStyles = makeStyles()((theme) => ({
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
-    direction: 'rtl',
   },
   header: {
     padding: theme.spacing(3, 2, 2, 2),
@@ -28,6 +27,8 @@ const useStyles = makeStyles()((theme) => ({
     color: '#fff',
     fontWeight: 700,
     fontSize: '1.25rem',
+    direction: 'rtl',
+    fontFamily: 'Heebo',
   },
   clearAllBtn: {
     color: '#ff3b30',
@@ -74,13 +75,14 @@ const useStyles = makeStyles()((theme) => ({
 
 export const NotificationCenter: React.FC = () => {
   const { classes } = useStyles();
-  const { 
-    notifications, 
-    removeNotification, 
+  const {
+    notifications,
+    removeNotification,
     clearNotifications,
     isNotificationCenterOpen,
     setIsNotificationCenterOpen,
-    markAllAsRead
+    markAllAsRead,
+    addNotification
   } = useChiefToast();
 
   const handleOpen = () => setIsNotificationCenterOpen(true);
@@ -108,10 +110,10 @@ export const NotificationCenter: React.FC = () => {
       <Box className={classes.header}>
         <Typography className={classes.headerTitle}>מרכז התראות</Typography>
         {notifications.length > 0 && (
-          <Button 
-            variant="outlined" 
+          <Button
+            variant="outlined"
             size="small"
-            startIcon={<DeleteSweepIcon sx={{ ml: 1, mr: -0.5 }} />}
+            startIcon={<DeleteOutlineOutlinedIcon sx={{ ml: 1, mr: -0.5 }} />}
             className={classes.clearAllBtn}
             onClick={clearNotifications}
           >

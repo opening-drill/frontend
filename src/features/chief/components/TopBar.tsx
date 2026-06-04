@@ -1,4 +1,6 @@
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
+import MyLocationIcon from '@mui/icons-material/MyLocation';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { Box, Typography, IconButton, Badge } from '@mui/material';
@@ -78,34 +80,34 @@ export const TopBar: React.FC = () => {
   const { location } = useDeviceLocation();
   const { notifications, setIsNotificationCenterOpen } = useChiefToast();
   const logout = useSetAtom(logoutAtom);
-  
+
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <Box className={classes.topBarContainer}>
-      <IconButton 
+      <IconButton
         className={classes.circle}
         onClick={() => setIsNotificationCenterOpen(true)}
       >
         <Badge badgeContent={unreadCount} color="error" max={99}>
-          <NotificationsIcon />
+          <NotificationsNoneOutlinedIcon />
         </Badge>
       </IconButton>
 
       <Box className={classes.pill}>
         <LocationOnIcon color="primary" fontSize="large" sx={{ flexShrink: 0 }} />
-        {location.loading ? (
-          <Typography variant="h5" className={classes.loading}>מאתר מיקום...</Typography>
+        {location.latitude && location.longitude ? (
+          <Typography variant="h5" sx={{ fontWeight: 600, letterSpacing: '0.05em' }}>
+            {location.latitude.toFixed(5)}°, {location.longitude.toFixed(5)}°
+          </Typography>
         ) : location.error ? (
           <Typography variant="h5" className={classes.error}>שגיאה באיתור מיקום</Typography>
         ) : (
-          <Typography variant="h5" sx={{ fontWeight: 600, letterSpacing: '0.05em' }}>
-            {location.latitude?.toFixed(5)}°, {location.longitude?.toFixed(5)}°
-          </Typography>
+          <Typography variant="h5" className={classes.loading}>מאתר מיקום...</Typography>
         )}
       </Box>
 
-      <IconButton 
+      <IconButton
         className={classes.circle}
         onClick={() => logout()}
       >

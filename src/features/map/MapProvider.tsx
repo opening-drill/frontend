@@ -21,22 +21,22 @@ export const MapProvider = ({ children }: { children: ReactNode }) => {
   const mapRef = useRef<Map | null>(null);
   const [coords, setCoords] = useState<number[]>([34.4668, 31.5016]);
 
-  const goToLocation = React.useCallback(
-    (coords: number[], zoom: number = 19.5, heading?: number) => {
-      if (mapRef.current) {
-        const center = fromLonLat(coords);
-        const rotation = heading !== undefined ? (heading * Math.PI) / 180 : undefined;
-
-        mapRef.current.getView().animate({
-          center,
-          zoom,
-          duration: 2000,
-          rotation,
-        });
+  const goToLocation = (
+    coords: number[],
+    zoom?: number,
+    _heading?: number // Kept for signature compatibility, but ignored for map rotation
+  ) => {
+    if (mapRef.current) {
+      const options: any = {
+        center: fromLonLat(coords),
+        duration: 1000,
+      };
+      if (zoom !== undefined) {
+        options.zoom = zoom;
       }
-    },
-    [],
-  );
+      mapRef.current.getView().animate(options);
+    }
+  }
 
   const contextValue = React.useMemo(
     () => ({ mapRef, coords, setCoords, goToLocation }),
