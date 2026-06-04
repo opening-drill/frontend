@@ -1,5 +1,5 @@
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import NotificationsIcon from '@mui/icons-material/Notifications';
+import NotificationsNoneOutlinedIcon from '@mui/icons-material/NotificationsNoneOutlined';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import { Box, Typography, IconButton, Badge } from '@mui/material';
 import { alpha } from '@mui/material/styles';
@@ -94,7 +94,7 @@ export const TopBar: React.FC = () => {
         onClick={() => setIsNotificationCenterOpen(true)}
       >
         <Badge badgeContent={unreadCount} color="error" max={99}>
-          <NotificationsIcon />
+          <NotificationsNoneOutlinedIcon />
         </Badge>
       </IconButton>
 
