@@ -13,9 +13,22 @@ export interface ReportPayload {
  */
 export async function sendAiPipelineReport(payload: ReportPayload): Promise<void> {
   const url = 'https://live-data-1015949672422.europe-west1.run.app/api/ai-pipeline/report';
-  await axios.post(url, payload, {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
+  
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  try {
+    const rawToken = localStorage.getItem('auth_token');
+    if (rawToken) {
+      const token = JSON.parse(rawToken);
+      if (token && typeof token === 'string') {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+    }
+  } catch (error) {
+    console.error('Error parsing auth token for report request:', error);
+  }
+
+  await axios.post(url, payload, { headers });
 }

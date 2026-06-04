@@ -302,7 +302,13 @@ export const OpenCameraButton: React.FC<OpenCameraButtonProps> = ({
 
             const payload = {
                 picture: base64String,
-                user_id: "faf",
+                user_id: (() => {
+                    try {
+                        return JSON.parse(localStorage.getItem('auth_user') || '{}').id || "unknown";
+                    } catch (e) {
+                        return "unknown";
+                    }
+                })(),
                 event_id: crypto.randomUUID().substring(0, 8),
                 target_location: [location.longitude || 0, location.latitude || 0],
                 sent_date: timeString,
