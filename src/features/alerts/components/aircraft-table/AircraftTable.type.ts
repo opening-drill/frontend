@@ -8,12 +8,10 @@ export type statusCellParam = { value: aircraftStatus }
 
 export type aircraftType = {
     id: string,
-    type: {
-        name: string,
-        price: number,
-        payloadKg: number,
-        velocityKmh: number,
-    },
+    aircraft_type: string,
+    price: number,
+    payload_kg: number,
+    velocity_kmh: number,
 };
 
 export type aircraftRowType = {

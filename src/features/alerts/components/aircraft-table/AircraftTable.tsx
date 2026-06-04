@@ -51,9 +51,8 @@ export const  AircraftTable = ({setIsAircraftTableOpen, handleAccept, alert} :{ 
   const fetchAircraft = async () => {
     try {
       setLoading(true);
-      console.log(aircraft);
       const aircraftData = await getAirCraftStatus();
-      setAircraft(aircraftData?.data ?? []);
+      setAircraft(aircraftData?.data?.aircraft ?? []);
     } catch (err) {
       console.error("Failed to load aircraft:", err);
       setAircraft([]); //remove when api is fixed
@@ -106,7 +105,7 @@ export const  AircraftTable = ({setIsAircraftTableOpen, handleAccept, alert} :{ 
         <Box sx={{ height: '63vh', width: "100%" }}>
           <Loader isLoading={loading}>
           <DataGrid
-            rows={rows}
+            rows={config.formatAircraftToRows(aircraft ?? [])}
             //rows={rows.filter((row) => row.status === AVAILABLE_STATUS)}
             columns={config.columns}
             getRowId={(row) => row.id}
