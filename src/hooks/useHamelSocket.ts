@@ -15,7 +15,6 @@ export const useHamelSocket = (): void => {
   useEffect((): (() => void) => {
     const liveSocket = initializeLiveSocket();
 
-
     const handleRecommendation = (
       recommendation: RecommendationPush,
     ): void => {

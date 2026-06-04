@@ -8,7 +8,7 @@ const TOKEN_STORAGE_KEY = 'token';
 const LOGIN_PATH = '/login';
 // ToDo(): after we have full link we need to work with proxy by vite and fix this code.
 const getApiBaseUrl = (): string => {
-  return import.meta.env.VITE_API_BASE_URL ?? '/api';
+  return  '/alerts-api';
 };
 
 const redirectToLogin = (): void => {
